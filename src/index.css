@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* Custom CSS Variables */
+:root {
+  --primary-black: #000000;
+  --primary-white: #ffffff;
+  --blue-white: #f0f8ff;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: auto;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--primary-black);
+  color: var(--primary-white);
+  overflow-x: hidden;
+  line-height: 1.5;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.5);
+}
+
+/* Custom utilities */
+@layer utilities {
+  .text-shadow-glow {
+    text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+  }
+  
+  .backdrop-blur-strong {
+    backdrop-filter: blur(20px);
+  }
+  
+  .gradient-border {
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.4), transparent);
+    height: 1px;
+  }
+}
+
+/* Animation classes */
+.float-animation {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.glow-pulse {
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+  }
+}
+
+/* Performance optimizations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Responsive typography */
+@media (max-width: 768px) {
+  .text-responsive-xl {
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+  
+  .text-responsive-2xl {
+    font-size: 2.5rem;
+    line-height: 1.1;
+  }
+}
+
+@media (min-width: 769px) {
+  .text-responsive-xl {
+    font-size: 3rem;
+    line-height: 1.2;
+  }
+  
+  .text-responsive-2xl {
+    font-size: 4rem;
+    line-height: 1.1;
+  }
+}
+
+/* Canvas container optimization */
+canvas {
+  display: block;
+  outline: none;
+}
+
+/* Smooth transitions for all elements */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Remove transitions for reduced motion users */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
