@@ -1,9 +1,6 @@
 import React, { useEffect } from 'react';
 import Lenis from '@studio-freight/lenis'
-import Hero from './components/Hero';
-import History from './components/History';
-import TravelBack from './components/TravelBack';
-import EnhancedFooter from './components/EnhancedFooter';
+import MainEarthScene from './components/3D/MainEarthScene';
 import './index.css';
 
 function App() {
@@ -29,11 +26,8 @@ function App() {
   }, []);
 
   return (
-    <div className="relative bg-black text-white overflow-x-hidden">
-      <Hero />
-      <History />
-      <TravelBack />
-      <EnhancedFooter />
+    <div className="relative bg-black text-white overflow-hidden">
+      <MainEarthScene />
     </div>
   );
 }
