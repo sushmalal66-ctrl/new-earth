@@ -1,157 +1,143 @@
 import React, { useRef, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { motion } from 'framer-motion';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ChevronDown } from 'lucide-react';
 import Earth3D from './Earth3D';
 
-gsap.registerPlugin(ScrollTrigger);
-
 const Hero: React.FC = () => {
   const heroRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const subtitleRef = useRef<HTMLParagraphElement>(null);
-  const canvasRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Enhanced entrance animation
-      const tl = gsap.timeline({ delay: 0.5 });
-      
-      tl.fromTo(titleRef.current, 
-        { opacity: 0, y: 150, scale: 0.8 },
-        { opacity: 1, y: 0, scale: 1, duration: 2, ease: "power3.out" }
-      )
-      .fromTo(subtitleRef.current,
-        { opacity: 0, y: 80, scale: 0.9 },
-        { opacity: 1, y: 0, scale: 1, duration: 1.5, ease: "power3.out" },
-        "-=1.2"
-      )
-      .fromTo(canvasRef.current,
-        { opacity: 0, scale: 0.5 },
-        { opacity: 1, scale: 1, duration: 2.5, ease: "power2.out" },
-        "-=2"
-      );
-
-      // Parallax scroll effects
-      gsap.to([titleRef.current, subtitleRef.current], {
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: "top top",
-          end: "bottom top",
-          scrub: 1,
-        },
-        y: -200,
-        opacity: 0.2,
-        scale: 0.8,
-      });
-
-      gsap.to(canvasRef.current, {
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: "top top",
-          end: "bottom top",
-          scrub: 1,
-        },
-        y: -100,
-        scale: 1.2,
-      });
-    }, heroRef);
-
-    return () => ctx.revert();
-  }, []);
 
   return (
     <section 
       ref={heroRef}
       className="relative h-screen w-full flex items-center justify-center overflow-hidden"
     >
-      {/* Enhanced Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-slate-900 to-black">
-        {/* Animated stars */}
+      {/* Enhanced Background with Gradients */}
+      <div className="absolute inset-0">
+        {/* Primary gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-slate-900 to-black" />
+        
+        {/* Radial gradient overlays for depth */}
+        <div className="absolute inset-0 bg-gradient-radial from-blue-900/20 via-transparent to-transparent" />
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-900/10 via-transparent to-purple-900/10" />
+        
+        {/* Subtle animated stars */}
         <div className="absolute inset-0">
-          {[...Array(50)].map((_, i) => (
+          {[...Array(100)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute w-1 h-1 bg-white rounded-full opacity-60"
+              className="absolute w-0.5 h-0.5 bg-white rounded-full opacity-60"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
               }}
               animate={{
-                opacity: [0.3, 1, 0.3],
-                scale: [0.5, 1, 0.5],
+                opacity: [0.2, 1, 0.2],
+                scale: [0.5, 1.2, 0.5],
               }}
               transition={{
-                duration: 2 + Math.random() * 3,
+                duration: 3 + Math.random() * 4,
                 repeat: Infinity,
-                delay: Math.random() * 2,
+                delay: Math.random() * 3,
               }}
             />
           ))}
         </div>
       </div>
       
-      {/* 3D Earth Canvas */}
-      <div ref={canvasRef} className="absolute inset-0">
-        <Canvas
-          camera={{ position: [0, 0, 5], fov: 50 }}
-          gl={{ 
-            antialias: true, 
-            alpha: true,
-            powerPreference: "high-performance"
-          }}
-          className="w-full h-full"
-        >
-          <Earth3D section="hero" />
-        </Canvas>
+      {/* 3D Earth Canvas - Positioned as focal point */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-full h-full max-w-4xl">
+          <Canvas
+            camera={{ position: [0, 0, 5], fov: 50 }}
+            gl={{ 
+              antialias: true, 
+              alpha: true,
+              powerPreference: "high-performance"
+            }}
+            className="w-full h-full"
+          >
+            <Earth3D />
+          </Canvas>
+        </div>
       </div>
 
-      {/* Content Overlay */}
-      <div className="relative z-10 text-center px-6 max-w-4xl">
-        <motion.h1 
-          ref={titleRef}
-          className="text-7xl md:text-9xl font-bold mb-8 tracking-tight leading-none"
-          style={{
-            background: 'linear-gradient(135deg, #ffffff 0%, #87ceeb 50%, #4169e1 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            filter: 'drop-shadow(0 0 30px rgba(135, 206, 235, 0.3))',
-          }}
-        >
-          EARTH
-        </motion.h1>
-        
-        <motion.p 
-          ref={subtitleRef}
-          className="text-2xl md:text-3xl text-blue-100/90 font-light tracking-wide leading-relaxed"
-        >
-          Journey Through 4.6 Billion Years of Wonder
-        </motion.p>
-        
+      {/* Content Overlay - Positioned to match reference layout */}
+      <div className="relative z-10 text-center px-6 max-w-6xl mx-auto">
+        {/* Main Title */}
         <motion.div
-          className="mt-12"
+          initial={{ opacity: 0, y: 100, scale: 0.8 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
+          className="mb-8"
+        >
+          <h1 className="text-7xl md:text-9xl lg:text-[12rem] font-bold mb-4 tracking-tight leading-none">
+            <span 
+              className="bg-gradient-to-b from-white via-blue-100 to-blue-200 bg-clip-text text-transparent"
+              style={{
+                filter: 'drop-shadow(0 0 40px rgba(135, 206, 235, 0.4))',
+              }}
+            >
+              EARTH
+            </span>
+          </h1>
+        </motion.div>
+        
+        {/* Subtitle */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.2, ease: "easeOut", delay: 1 }}
+          className="mb-12"
+        >
+          <p className="text-xl md:text-2xl lg:text-3xl text-blue-100/90 font-light tracking-wide leading-relaxed max-w-4xl mx-auto">
+            Journey Through 4.6 Billion Years of Wonder
+          </p>
+        </motion.div>
+        
+        {/* Description */}
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 2.5, duration: 1 }}
+          transition={{ duration: 1, ease: "easeOut", delay: 1.5 }}
+          className="mb-16"
         >
-          <p className="text-blue-200/70 text-lg mb-8 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-blue-200/70 max-w-2xl mx-auto leading-relaxed">
             Discover the incredible story of our planet through an immersive 
-            3D experience that brings Earth's history to life
+            experience that brings Earth's magnificent history to life
           </p>
+        </motion.div>
+
+        {/* Call to Action */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut", delay: 2 }}
+          className="mb-20"
+        >
+          <motion.button
+            className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-semibold rounded-full text-lg shadow-2xl shadow-blue-500/25 border border-blue-400/20"
+            whileHover={{ 
+              scale: 1.05,
+              boxShadow: "0 20px 40px rgba(59, 130, 246, 0.4)"
+            }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
+            Begin Exploration
+          </motion.button>
         </motion.div>
       </div>
 
       {/* Scroll Indicator */}
       <motion.div 
-        className="absolute bottom-12 left-1/2 transform -translate-x-1/2 cursor-pointer"
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 cursor-pointer z-20"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 3, duration: 1 }}
+        transition={{ delay: 2.5, duration: 1 }}
         whileHover={{ scale: 1.1 }}
       >
-        <div className="flex flex-col items-center space-y-2">
+        <div className="flex flex-col items-center space-y-3">
           <span className="text-blue-200/70 text-sm font-medium tracking-wide">
             Scroll to explore
           </span>
@@ -169,6 +155,19 @@ const Hero: React.FC = () => {
           <ChevronDown className="w-5 h-5 text-blue-300/70 animate-bounce" />
         </div>
       </motion.div>
+
+      {/* Ambient Glow Effects */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Top glow */}
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+        
+        {/* Bottom glow */}
+        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+        
+        {/* Side glows */}
+        <div className="absolute top-1/2 left-0 transform -translate-y-1/2 w-64 h-64 bg-blue-400/5 rounded-full blur-2xl" />
+        <div className="absolute top-1/2 right-0 transform -translate-y-1/2 w-64 h-64 bg-blue-400/5 rounded-full blur-2xl" />
+      </div>
     </section>
   );
 };

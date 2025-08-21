@@ -1,27 +1,17 @@
-import React, { useRef, useEffect, useMemo } from 'react';
-import { useFrame, useThree, useLoader } from '@react-three/fiber';
-import { Sphere, useTexture } from '@react-three/drei';
+import React, { useRef, useMemo } from 'react';
+import { useFrame, useLoader } from '@react-three/fiber';
+import { Sphere } from '@react-three/drei';
 import * as THREE from 'three';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-gsap.registerPlugin(ScrollTrigger);
-
-interface Earth3DProps {
-  section: 'hero' | 'history' | 'travel';
-  scrollProgress?: number;
-  timelineProgress?: number;
-}
-
-const Earth3D: React.FC<Earth3DProps> = ({ section, scrollProgress = 0, timelineProgress = 0 }) => {
+const Earth3D: React.FC = () => {
   const meshRef = useRef<THREE.Mesh>(null);
   const atmosphereRef = useRef<THREE.Mesh>(null);
-  const { camera, scene } = useThree();
+  const glowRef = useRef<THREE.Mesh>(null);
   
-  // Load Earth texture from assets
-  const earthTexture = useTexture('/assets/earth.jpg');
+  // Load Earth texture
+  const earthTexture = useLoader(THREE.TextureLoader, '/assets/earth.jpg');
   
-  // Configure texture for better quality
+  // Configure texture for optimal quality
   useMemo(() => {
     if (earthTexture) {
       earthTexture.wrapS = THREE.RepeatWrapping;
@@ -29,15 +19,28 @@ const Earth3D: React.FC<Earth3DProps> = ({ section, scrollProgress = 0, timeline
       earthTexture.minFilter = THREE.LinearMipmapLinearFilter;
       earthTexture.magFilter = THREE.LinearFilter;
       earthTexture.generateMipmaps = true;
+      earthTexture.anisotropy = 16;
     }
   }, [earthTexture]);
 
-  // Create atmosphere material
+  // Enhanced Earth material with realistic lighting
+  const earthMaterial = useMemo(() => {
+    return new THREE.MeshPhongMaterial({
+      map: earthTexture,
+      bumpScale: 0.05,
+      shininess: 100,
+      specular: new THREE.Color(0x4169e1),
+      transparent: false,
+    });
+  }, [earthTexture]);
+
+  // Atmosphere shader material for realistic glow
   const atmosphereMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 0 },
-        opacity: { value: 0.15 }
+        opacity: { value: 0.2 },
+        glowColor: { value: new THREE.Color(0x87ceeb) }
       },
       vertexShader: `
         varying vec3 vNormal;
@@ -52,13 +55,18 @@ const Earth3D: React.FC<Earth3DProps> = ({ section, scrollProgress = 0, timeline
       fragmentShader: `
         uniform float time;
         uniform float opacity;
+        uniform vec3 glowColor;
         varying vec3 vNormal;
         varying vec3 vPosition;
         
         void main() {
-          float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
-          vec3 atmosphere = vec3(0.3, 0.6, 1.0) * intensity;
-          gl_FragColor = vec4(atmosphere, opacity * intensity);
+          float intensity = pow(0.8 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
+          vec3 atmosphere = glowColor * intensity;
+          
+          // Add subtle animation
+          float pulse = sin(time * 0.8) * 0.1 + 0.9;
+          
+          gl_FragColor = vec4(atmosphere, opacity * intensity * pulse);
         }
       `,
       blending: THREE.AdditiveBlending,
@@ -67,157 +75,151 @@ const Earth3D: React.FC<Earth3DProps> = ({ section, scrollProgress = 0, timeline
     });
   }, []);
 
-  useEffect(() => {
-    if (!meshRef.current) return;
-
-    const ctx = gsap.context(() => {
-      // Section-specific initial setup
-      if (section === 'hero') {
-        gsap.set(meshRef.current!.scale, { x: 1.8, y: 1.8, z: 1.8 });
-        gsap.set(meshRef.current!.position, { x: 0, y: 0, z: 0 });
-        gsap.set(meshRef.current!.rotation, { x: 0, y: 0, z: 0 });
-      }
-
-      if (section === 'history') {
-        // Timeline-based Earth positioning and rotation
-        ScrollTrigger.create({
-          trigger: '.history-section',
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: 1,
-          onUpdate: (self) => {
-            const progress = self.progress;
-            
-            // Dynamic scaling based on scroll
-            const scale = 1.2 + progress * 1.5;
-            gsap.set(meshRef.current!.scale, { x: scale, y: scale, z: scale });
-            
-            // Rotate to show different regions for different timeline events
-            const rotationY = progress * Math.PI * 2;
-            const rotationX = Math.sin(progress * Math.PI) * 0.3;
-            gsap.set(meshRef.current!.rotation, { 
-              x: rotationX, 
-              y: rotationY, 
-              z: Math.sin(progress * Math.PI * 2) * 0.1 
-            });
-            
-            // Position adjustments
-            gsap.set(meshRef.current!.position, { 
-              x: Math.sin(progress * Math.PI) * 0.5,
-              y: Math.cos(progress * Math.PI * 2) * 0.2,
-              z: 0
-            });
-          }
-        });
-      }
-
-      if (section === 'travel') {
-        ScrollTrigger.create({
-          trigger: '.travel-section',
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: 1,
-          onUpdate: (self) => {
-            const progress = self.progress;
-            
-            // Dramatic cinematic movement
-            const scale = 0.8 + progress * 2.2;
-            gsap.set(meshRef.current!.scale, { x: scale, y: scale, z: scale });
-            
-            // Complex rotation for cinematic effect
-            gsap.set(meshRef.current!.rotation, { 
-              x: progress * Math.PI * 0.8,
-              y: progress * Math.PI * 3,
-              z: Math.sin(progress * Math.PI * 4) * 0.2
-            });
-            
-            // Dynamic positioning
-            gsap.set(meshRef.current!.position, {
-              x: Math.cos(progress * Math.PI * 2) * 1.2,
-              y: Math.sin(progress * Math.PI * 3) * 0.8,
-              z: Math.sin(progress * Math.PI) * 0.5
-            });
-          }
-        });
-      }
+  // Outer glow material
+  const glowMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 },
+        glowColor: { value: new THREE.Color(0x4169e1) }
+      },
+      vertexShader: `
+        varying vec3 vNormal;
+        uniform float time;
+        
+        void main() {
+          vNormal = normalize(normalMatrix * normal);
+          vec3 pos = position * (1.0 + sin(time * 0.5) * 0.01);
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        uniform vec3 glowColor;
+        varying vec3 vNormal;
+        
+        void main() {
+          float intensity = pow(0.6 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.0);
+          float pulse = sin(time * 0.6) * 0.2 + 0.8;
+          gl_FragColor = vec4(glowColor, intensity * 0.15 * pulse);
+        }
+      `,
+      blending: THREE.AdditiveBlending,
+      side: THREE.BackSide,
+      transparent: true
     });
+  }, []);
 
-    return () => ctx.revert();
-  }, [section]);
-
-  // Continuous rotation and floating animation
+  // Smooth rotation animation
   useFrame((state) => {
-    if (!meshRef.current || !atmosphereRef.current) return;
+    if (!meshRef.current || !atmosphereRef.current || !glowRef.current) return;
     
     const time = state.clock.elapsedTime;
     
-    // Base rotation (slow)
-    meshRef.current.rotation.y += 0.002;
+    // Smooth Earth rotation
+    meshRef.current.rotation.y += 0.003;
+    
+    // Slightly faster atmosphere rotation for depth
+    atmosphereRef.current.rotation.y = meshRef.current.rotation.y * 1.02;
+    
+    // Counter-rotating glow for dynamic effect
+    glowRef.current.rotation.y = -meshRef.current.rotation.y * 0.5;
     
     // Subtle floating animation
-    meshRef.current.position.y += Math.sin(time * 0.5) * 0.001;
+    const floatY = Math.sin(time * 0.4) * 0.05;
+    meshRef.current.position.y = floatY;
+    atmosphereRef.current.position.y = floatY;
+    glowRef.current.position.y = floatY;
     
-    // Atmosphere animation
-    atmosphereRef.current.rotation.y = meshRef.current.rotation.y * 1.1;
-    
-    // Update atmosphere shader time
+    // Update shader uniforms
     if (atmosphereMaterial.uniforms.time) {
       atmosphereMaterial.uniforms.time.value = time;
+    }
+    if (glowMaterial.uniforms.time) {
+      glowMaterial.uniforms.time.value = time;
     }
   });
 
   return (
     <group>
-      {/* Enhanced lighting setup */}
+      {/* Enhanced Lighting Setup */}
       <ambientLight intensity={0.15} color="#f0f8ff" />
       
-      {/* Main sun light */}
+      {/* Main directional light (sun) */}
       <directionalLight 
         position={[10, 5, 5]} 
-        intensity={1.2}
+        intensity={1.8}
         color="#ffffff"
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
+        shadow-camera-far={50}
+        shadow-camera-left={-10}
+        shadow-camera-right={10}
+        shadow-camera-top={10}
+        shadow-camera-bottom={-10}
       />
       
-      {/* Fill light */}
+      {/* Fill light from opposite side */}
       <directionalLight 
-        position={[-5, -2, -5]} 
-        intensity={0.3}
+        position={[-8, -3, -5]} 
+        intensity={0.4}
         color="#4169e1"
       />
       
-      {/* Rim light for atmosphere */}
+      {/* Rim light for atmosphere effect */}
       <pointLight 
         position={[0, 0, 8]} 
-        intensity={0.5}
+        intensity={0.6}
         color="#87ceeb"
-        distance={20}
+        distance={25}
+        decay={2}
+      />
+
+      {/* Additional accent lights */}
+      <pointLight 
+        position={[5, 5, 0]} 
+        intensity={0.3}
+        color="#ffffff"
+        distance={15}
+      />
+      
+      <pointLight 
+        position={[-5, -5, 0]} 
+        intensity={0.2}
+        color="#4169e1"
+        distance={15}
       />
 
       {/* Main Earth Sphere */}
-      <Sphere ref={meshRef} args={[1, 128, 64]} castShadow receiveShadow>
-        <meshPhongMaterial 
-          map={earthTexture}
-          bumpScale={0.02}
-          shininess={50}
-          specular={new THREE.Color('#4169e1')}
-          transparent={false}
-        />
+      <Sphere ref={meshRef} args={[1.8, 128, 64]} castShadow receiveShadow>
+        <primitive object={earthMaterial} attach="material" />
       </Sphere>
 
       {/* Atmosphere Layer */}
-      <Sphere ref={atmosphereRef} args={[1.05, 64, 32]}>
+      <Sphere ref={atmosphereRef} args={[1.85, 64, 32]}>
         <primitive object={atmosphereMaterial} attach="material" />
       </Sphere>
 
-      {/* Outer glow */}
-      <Sphere args={[1.08, 32, 16]}>
+      {/* Outer Glow Effect */}
+      <Sphere ref={glowRef} args={[1.95, 32, 16]}>
+        <primitive object={glowMaterial} attach="material" />
+      </Sphere>
+
+      {/* Additional subtle glow layers */}
+      <Sphere args={[2.1, 16, 8]}>
         <meshBasicMaterial 
           color="#4169e1"
           transparent
-          opacity={0.05}
+          opacity={0.03}
+          side={THREE.BackSide}
+        />
+      </Sphere>
+      
+      <Sphere args={[2.3, 12, 6]}>
+        <meshBasicMaterial 
+          color="#87ceeb"
+          transparent
+          opacity={0.02}
           side={THREE.BackSide}
         />
       </Sphere>
