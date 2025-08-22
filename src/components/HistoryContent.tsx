@@ -135,45 +135,70 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
   useEffect(() => {
     if (!contentRef.current) return;
 
+    // Optimize ScrollTrigger performance
+    ScrollTrigger.config({
+      autoRefreshEvents: "visibilitychange,DOMContentLoaded,load"
+    });
+
     const ctx = gsap.context(() => {
-      // Animate period cards on scroll
-      periodsRef.current.forEach((period, index) => {
-        if (!period) return;
-
-        gsap.fromTo(period,
-          { 
-            opacity: 0, 
-            y: 150,
-            scale: 0.8,
-            rotateX: -20
-          },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            rotateX: 0,
-            duration: 1.5,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: period,
-              start: "top 85%",
-              end: "top 15%",
-              toggleActions: "play none none reverse"
+      // Use ScrollTrigger.batch for better performance
+      const validPeriods = periodsRef.current.filter(Boolean);
+      
+      ScrollTrigger.batch(validPeriods, {
+        onEnter: (elements) => {
+          gsap.fromTo(elements,
+            { 
+              opacity: 0, 
+              y: 150,
+              scale: 0.8,
+              rotateX: -20
+            },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              rotateX: 0,
+              duration: 1.5,
+              ease: "power3.out",
+              stagger: 0.2,
+              force3D: true
             }
-          }
-        );
+          );
+        },
+        onLeave: (elements) => {
+          gsap.to(elements, {
+            opacity: 0.3,
+            scale: 0.95,
+            duration: 0.5,
+            force3D: true
+          });
+        },
+        onEnterBack: (elements) => {
+          gsap.to(elements, {
+            opacity: 1,
+            scale: 1,
+            duration: 0.5,
+            force3D: true
+          });
+        },
+        start: "top 85%",
+        end: "top 15%"
+      });
 
-        // Parallax effect for images
+      // Separate parallax animations for images
+      validPeriods.forEach((period) => {
         const image = period.querySelector('.period-image');
         if (image) {
           gsap.to(image, {
             y: -50,
             scale: 1.1,
+            ease: "none",
             scrollTrigger: {
               trigger: period,
               start: "top bottom",
               end: "bottom top",
-              scrub: 1
+              scrub: 0.5,
+              invalidateOnRefresh: true
             }
           });
         }
@@ -187,7 +212,8 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
         ease: "power2.inOut",
         repeat: -1,
         yoyo: true,
-        stagger: 0.5
+        stagger: 0.5,
+        force3D: true
       });
 
     }, contentRef);

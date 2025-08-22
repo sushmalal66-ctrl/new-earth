@@ -155,35 +155,65 @@ const Timeline: React.FC = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Animate timeline events on scroll
-      timelineEvents.forEach((event, index) => {
-        const eventElement = document.querySelector(`[data-event="${event.id}"]`);
-        if (!eventElement) return;
+      // Batch timeline events for better performance
+      const leftEvents = timelineEvents.filter(event => event.position === 'left')
+        .map(event => document.querySelector(`[data-event="${event.id}"]`))
+        .filter(Boolean);
+      
+      const rightEvents = timelineEvents.filter(event => event.position === 'right')
+        .map(event => document.querySelector(`[data-event="${event.id}"]`))
+        .filter(Boolean);
 
-        gsap.fromTo(eventElement,
-          { 
-            opacity: 0, 
-            x: event.position === 'left' ? -100 : 100,
-            y: 50,
-            scale: 0.8
-          },
-          {
-            opacity: 1,
-            x: 0,
-            y: 0,
-            scale: 1,
-            duration: 1.2,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: eventElement,
-              start: "top 80%",
-              end: "top 20%",
-              toggleActions: "play none none reverse",
-              onEnter: () => setActiveEvent(event.id),
-              onEnterBack: () => setActiveEvent(event.id)
+      // Animate left events
+      ScrollTrigger.batch(leftEvents, {
+        onEnter: (elements) => {
+          gsap.fromTo(elements,
+            { 
+              opacity: 0, 
+              x: -100,
+              y: 50,
+              scale: 0.8
+            },
+            {
+              opacity: 1,
+              x: 0,
+              y: 0,
+              scale: 1,
+              duration: 1.2,
+              ease: "power3.out",
+              stagger: 0.1,
+              force3D: true
             }
-          }
-        );
+          );
+        },
+        start: "top 80%",
+        end: "top 20%"
+      });
+
+      // Animate right events
+      ScrollTrigger.batch(rightEvents, {
+        onEnter: (elements) => {
+          gsap.fromTo(elements,
+            { 
+              opacity: 0, 
+              x: 100,
+              y: 50,
+              scale: 0.8
+            },
+            {
+              opacity: 1,
+              x: 0,
+              y: 0,
+              scale: 1,
+              duration: 1.2,
+              ease: "power3.out",
+              stagger: 0.1,
+              force3D: true
+            }
+          );
+        },
+        start: "top 80%",
+        end: "top 20%"
       });
 
       // Animate timeline line
@@ -192,12 +222,13 @@ const Timeline: React.FC = () => {
         {
           scaleY: 1,
           duration: 2,
-          ease: "power2.out",
+          ease: "none",
+          force3D: true,
           scrollTrigger: {
             trigger: containerRef.current,
             start: "top 80%",
             end: "bottom 20%",
-            scrub: 1
+            scrub: 0.5
           }
         }
       );

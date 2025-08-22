@@ -221,7 +221,11 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
     if (!meshRef.current || !groupRef.current) return;
     
     const time = state.clock.elapsedTime;
-    const progress = Math.max(0, Math.min(1, scrollProgressRef.current));
+    const progress = scrollProgressRef.current;
+    
+    // Early exit if no significant change
+    if (Math.abs(progress - (meshRef.current as any).lastProgress || 0) < 0.001) return;
+    (meshRef.current as any).lastProgress = progress;
     
     // Smooth Earth rotation with scroll influence
     const baseRotation = time * 0.003;
@@ -247,7 +251,7 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
     atmosphereMaterial.uniforms.scrollProgress.value = progress;
     
     glowMaterial.uniforms.time.value = time;
-    glowMaterial.uniforms.scrollProgress.value = progress;
+    glowMaterial.uniforms.scrollProgress.value = progress; 
     
     // Controlled positioning with proper bounds
     const floatY = Math.sin(time * 0.2) * 0.01;
@@ -257,20 +261,12 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
     // Controlled scale changes with bounds
     const scrollScale = Math.max(0.8, Math.min(3.5, 1 + progress * 1.8));
     groupRef.current.scale.setScalar(scrollScale);
-    
-    // Ensure Earth never gets too close or disappears
-    const minDistance = 2;
-    const maxDistance = 8;
-    const currentDistance = groupRef.current.position.z;
-    if (currentDistance < minDistance || currentDistance > maxDistance) {
-      groupRef.current.position.z = THREE.MathUtils.clamp(currentDistance, minDistance, maxDistance);
-    }
   });
 
   // Expose methods to parent component
   useImperativeHandle(ref, () => ({
     updateScroll: (progress: number) => {
-      scrollProgressRef.current = Math.max(0, Math.min(1, progress));
+      scrollProgressRef.current = progress;
     }
   }));
 

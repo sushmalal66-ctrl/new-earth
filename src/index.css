@@ -152,6 +152,24 @@ body {
   perspective: 1000px;
 }
 
+/* Enhanced performance classes */
+.transform-gpu {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.scroll-optimized {
+  contain: layout style paint;
+  content-visibility: auto;
+}
+
+.animation-optimized {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
 /* Enhanced focus styles for better accessibility */
 button:focus-visible,
 input:focus-visible,
@@ -239,5 +257,24 @@ canvas {
   /* Optimize canvas for mobile */
   canvas {
     image-rendering: optimizeSpeed;
+    image-rendering: -webkit-optimize-contrast;
   }
+}
+
+/* Scroll performance optimizations */
+* {
+  scroll-behavior: auto; /* Let Lenis handle smooth scrolling */
+}
+
+/* Reduce paint complexity during scroll */
+.history-item,
+.timeline-event {
+  contain: layout style;
+  will-change: transform, opacity;
+}
+
+/* Optimize transforms for better performance */
+.period-image {
+  will-change: transform;
+  backface-visibility: hidden;
 }
