@@ -3,6 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import { motion } from 'framer-motion';
 import Scene from '../components/3d/Scene';
 import Section from '../components/ui/Section';
+import HistoryContent from '../components/HistoryContent';
 import { useLenisGsapSync } from '../hooks/useLenisGsapSync';
 import { initializeTimelines } from '../animations/timelines';
 import { sections } from '../data/sections';
@@ -10,7 +11,7 @@ import { sections } from '../data/sections';
 const Home: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
-  const { scrollProgress, earthProgress } = useLenisGsapSync();
+  const { scrollProgress, earthProgress, scrollTo } = useLenisGsapSync();
 
   useEffect(() => {
     if (containerRef.current) {
@@ -45,13 +46,26 @@ const Home: React.FC = () => {
 
       {/* Scrollable Content */}
       <div className="relative z-20">
-        {sections.map((section, index) => (
+        {/* Hero Section */}
+        <Section
+          key={sections[0].id}
+          {...sections[0]}
+          index={0}
+          isFirst={true}
+          isLast={false}
+        />
+        
+        {/* History Content Component */}
+        <HistoryContent scrollProgress={scrollProgress.get()} />
+        
+        {/* Remaining sections */}
+        {sections.slice(1).map((section, index) => (
           <Section
             key={section.id}
             {...section}
-            index={index}
-            isFirst={index === 0}
-            isLast={index === sections.length - 1}
+            index={index + 1}
+            isFirst={false}
+            isLast={index === sections.length - 2}
           />
         ))}
       </div>

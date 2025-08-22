@@ -9,6 +9,9 @@ interface SectionProps {
   era: string;
   timeAgo: string;
   keyPoints: string[];
+  color?: string;
+  gradient?: string;
+  image?: string;
   cta?: {
     text: string;
     action: () => void;
@@ -26,6 +29,9 @@ const Section: React.FC<SectionProps> = ({
   era,
   timeAgo,
   keyPoints,
+  color,
+  gradient,
+  image,
   cta,
   index,
   isFirst,
@@ -59,6 +65,9 @@ const Section: React.FC<SectionProps> = ({
   };
 
   const getGradientClass = (index: number) => {
+    // Use provided gradient or fallback to default
+    if (gradient) return gradient;
+    
     const gradients = [
       'from-cyan-400 to-blue-500',
       'from-orange-400 to-red-500',
@@ -190,33 +199,94 @@ const Section: React.FC<SectionProps> = ({
               variants={itemVariants}
               className="relative"
             >
-              {/* Decorative Frame */}
-              <div className="relative p-8">
-                <div className={`absolute inset-0 bg-gradient-to-br ${getGradientClass(index)} opacity-10 rounded-3xl`} />
-                <div className="absolute inset-0 border border-cyan-500/20 rounded-3xl" />
-                
-                {/* Content Placeholder */}
-                <div className="relative z-10 aspect-square bg-black/40 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                  <div className="text-center space-y-4">
-                    <div className={`w-16 h-16 mx-auto bg-gradient-to-r ${getGradientClass(index)} rounded-2xl flex items-center justify-center`}>
-                      <span className="text-2xl font-bold text-white">{index + 1}</span>
-                    </div>
-                    <p className="text-slate-400 text-sm">
-                      Era visualization<br />
-                      <span className="text-cyan-300">{era}</span>
-                    </p>
+              {image ? (
+                /* Image Display */
+                <div className="relative group">
+                  <div className="relative overflow-hidden rounded-3xl shadow-2xl">
+                    <img 
+                      src={image}
+                      alt={title}
+                      loading="lazy" 
+                      className="w-full h-80 md:h-96 object-cover group-hover:scale-110 transition-transform duration-700"
+                      onError={(e) => {
+                        // Fallback if image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const fallback = target.nextElementSibling as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                    />
                     
-                    {/* Simple visual representation */}
-                    <div className="w-full h-32 bg-gradient-to-b from-transparent via-cyan-500/20 to-transparent rounded-lg flex items-center justify-center">
-                      <div className={`w-12 h-12 bg-gradient-to-r ${getGradientClass(index)} rounded-full animate-pulse`} />
+                    {/* Fallback content (hidden by default) */}
+                    <div className="hidden absolute inset-0 bg-black/40 backdrop-blur-sm rounded-3xl items-center justify-center">
+                      <div className="text-center space-y-4">
+                        <div className={`w-16 h-16 mx-auto bg-gradient-to-r ${getGradientClass(index)} rounded-2xl flex items-center justify-center`}>
+                          <span className="text-2xl font-bold text-white">{index + 1}</span>
+                        </div>
+                        <p className="text-slate-400 text-sm">
+                          Era visualization<br />
+                          <span className="text-cyan-300">{era}</span>
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {/* Image Overlay */}
+                    <div className={`absolute inset-0 bg-gradient-to-t ${getGradientClass(index)} opacity-20 group-hover:opacity-30 transition-opacity duration-500`} />
+                    
+                    {/* Era Badge on Image */}
+                    <div className="absolute top-6 right-6">
+                      <div className={`w-16 h-16 bg-gradient-to-r ${getGradientClass(index)} rounded-2xl flex items-center justify-center shadow-lg backdrop-blur-sm`}>
+                        <span className="text-xl font-bold text-white">{index + 1}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Stats Overlay */}
+                    <div className="absolute bottom-6 left-6 right-6 bg-black/70 backdrop-blur-md border border-gray-700/20 rounded-2xl p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-gray-100 font-semibold text-lg">{era}</div>
+                          <div className="text-gray-400 text-sm">{timeAgo}</div>
+                        </div>
+                        <div className={`w-12 h-12 bg-gradient-to-r ${getGradientClass(index)} rounded-xl flex items-center justify-center`}>
+                          <span className="text-lg font-bold text-white">{index + 1}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
+                  
+                  {/* Decorative Elements */}
+                  <div className="absolute -top-4 -left-4 w-24 h-24 bg-gray-500/10 rounded-full blur-xl" />
+                  <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-gray-600/10 rounded-full blur-xl" />
                 </div>
+              ) : (
+                /* Fallback Decorative Frame */
+                <div className="relative p-8">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${getGradientClass(index)} opacity-10 rounded-3xl`} />
+                  <div className="absolute inset-0 border border-cyan-500/20 rounded-3xl" />
+                  
+                  {/* Content Placeholder */}
+                  <div className="relative z-10 aspect-square bg-black/40 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                    <div className="text-center space-y-4">
+                      <div className={`w-16 h-16 mx-auto bg-gradient-to-r ${getGradientClass(index)} rounded-2xl flex items-center justify-center`}>
+                        <span className="text-2xl font-bold text-white">{index + 1}</span>
+                      </div>
+                      <p className="text-slate-400 text-sm">
+                        Era visualization<br />
+                        <span className="text-cyan-300">{era}</span>
+                      </p>
+                      
+                      {/* Simple visual representation */}
+                      <div className="w-full h-32 bg-gradient-to-b from-transparent via-cyan-500/20 to-transparent rounded-lg flex items-center justify-center">
+                        <div className={`w-12 h-12 bg-gradient-to-r ${getGradientClass(index)} rounded-full animate-pulse`} />
+                      </div>
+                    </div>
+                  </div>
 
-                {/* Floating Elements */}
-                <div className="absolute -top-4 -right-4 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl animate-pulse" />
-                <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-blue-500/10 rounded-full blur-xl animate-pulse" style={{ animationDelay: '1s' }} />
-              </div>
+                  {/* Floating Elements */}
+                  <div className="absolute -top-4 -right-4 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl animate-pulse" />
+                  <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-blue-500/10 rounded-full blur-xl animate-pulse" style={{ animationDelay: '1s' }} />
+                </div>
+              )}
             </motion.div>
           </div>
         </motion.div>
