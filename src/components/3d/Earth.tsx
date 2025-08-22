@@ -12,7 +12,6 @@ interface EarthProps {
 const Earth: React.FC<EarthProps> = ({ earthProgress, timelineProgress }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
-  const [hasMovedForward, setHasMovedForward] = useState(false);
   const [targetZ, setTargetZ] = useState(0);
   const [currentZ, setCurrentZ] = useState(0);
   const [rotationSpeed, setRotationSpeed] = useState(0.5);
@@ -53,36 +52,39 @@ const Earth: React.FC<EarthProps> = ({ earthProgress, timelineProgress }) => {
     }
   }, [earthTexture]);
 
-  // Scroll detection - move forward only once
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!hasMovedForward) {
-        setHasMovedForward(true);
-        setTargetZ(1.2); // Move 20% closer (from 0 to 1.2 units forward)
-      }
-    };
+  // Determine sphere segments based on device performance
+  const getSphereSegments = () => {
+    if (window.innerWidth < 768 || navigator.hardwareConcurrency < 4) {
+      return [32, 16]; // Medium performance
+    } else if (navigator.hardwareConcurrency < 8) {
+      return [64, 32]; // High performance
+    }
+    return [128, 64]; // Ultra performance
+  };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [hasMovedForward]);
+  const [widthSegments, heightSegments] = useMemo(() => getSphereSegments(), []);
+
+  // Drive forward movement based on earthProgress
+  useEffect(() => {
+    const unsubscribe = earthProgress.onChange((latestProgress) => {
+      // Trigger forward movement when progress is greater than 0 (i.e., user has scrolled)
+      if (latestProgress > 0 && targetZ === 0) {
+        setTargetZ(1.2); // Move 20% closer
+      }
+    });
+    return () => unsubscribe();
+  }, [earthProgress, targetZ]);
 
   // Listen for timeline progress changes to adjust rotation speed
   useEffect(() => {
-    const handleTimelineProgress = () => {
-      if (timelineProgress) {
-        const progress = timelineProgress.get();
+    if (timelineProgress) {
+      const unsubscribe = timelineProgress.onChange((progress) => {
         // Vary rotation speed based on timeline progress (0.3 to 1.2)
         const newSpeed = 0.3 + (progress * 0.9);
         setRotationSpeed(newSpeed);
-      }
-    };
-
-    // Listen for custom scroll events
-    window.addEventListener('scroll-progress', handleTimelineProgress);
-    
-    return () => {
-      window.removeEventListener('scroll-progress', handleTimelineProgress);
-    };
+      });
+      return () => unsubscribe();
+    }
   }, [timelineProgress]);
 
   // Animation loop
@@ -132,7 +134,7 @@ const Earth: React.FC<EarthProps> = ({ earthProgress, timelineProgress }) => {
       
       {/* Earth Sphere */}
       <mesh ref={meshRef}>
-        <sphereGeometry args={[1, 128, 64]} />
+        <sphereGeometry args={[1, widthSegments, heightSegments]} />
         <primitive object={earthMaterial} attach="material" />
       </mesh>
       

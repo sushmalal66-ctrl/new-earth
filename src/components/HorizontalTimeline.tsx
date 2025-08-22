@@ -37,12 +37,10 @@ interface TimelineEra {
 
 interface HorizontalTimelineProps {
   earthProgress: any; // MotionValue from parent
-  onProgressChange: (progress: number) => void;
 }
 
 const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({ 
   earthProgress, 
-  onProgressChange 
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
