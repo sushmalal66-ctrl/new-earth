@@ -27,27 +27,41 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
     }
   }, [earthTexture]);
 
-  // Create a simple night texture procedurally
+  // Create a futuristic night texture with neon city lights
   const nightTexture = useMemo(() => {
     const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 256;
+    canvas.width = 1024;
+    canvas.height = 512;
     const ctx = canvas.getContext('2d');
     if (ctx) {
-      // Create a dark blue gradient
-      const gradient = ctx.createLinearGradient(0, 0, 512, 256);
-      gradient.addColorStop(0, '#001122');
-      gradient.addColorStop(0.5, '#002244');
-      gradient.addColorStop(1, '#001122');
+      // Dark space background
+      const gradient = ctx.createLinearGradient(0, 0, 1024, 512);
+      gradient.addColorStop(0, '#0a0a0f');
+      gradient.addColorStop(0.5, '#1a1a2e');
+      gradient.addColorStop(1, '#0a0a0f');
       ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 512, 256);
+      ctx.fillRect(0, 0, 1024, 512);
       
-      // Add some city lights
-      ctx.fillStyle = '#ffaa00';
-      for (let i = 0; i < 50; i++) {
-        const x = Math.random() * 512;
-        const y = Math.random() * 256;
-        ctx.fillRect(x, y, 1, 1);
+      // Add futuristic city lights in cyan/blue spectrum
+      const lightColors = ['#00ffff', '#0080ff', '#004080', '#80ffff'];
+      ctx.globalCompositeOperation = 'lighter';
+      
+      for (let i = 0; i < 200; i++) {
+        const x = Math.random() * 1024;
+        const y = Math.random() * 512;
+        const size = Math.random() * 3 + 1;
+        const color = lightColors[Math.floor(Math.random() * lightColors.length)];
+        
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Add glow effect
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = color;
+        ctx.fill();
+        ctx.shadowBlur = 0;
       }
     }
     
@@ -57,7 +71,7 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
     return texture;
   }, []);
 
-  // Create a simple clouds texture procedurally
+  // Create futuristic clouds texture
   const cloudsTexture = useMemo(() => {
     const canvas = document.createElement('canvas');
     canvas.width = 512;
@@ -67,13 +81,13 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, 512, 256);
       
-      // Add cloud patterns
-      ctx.fillStyle = '#ffffff';
-      ctx.globalAlpha = 0.3;
-      for (let i = 0; i < 100; i++) {
+      // Add semi-transparent cloud patterns with blue tint
+      ctx.fillStyle = '#80a0ff';
+      ctx.globalAlpha = 0.2;
+      for (let i = 0; i < 80; i++) {
         const x = Math.random() * 512;
         const y = Math.random() * 256;
-        const size = Math.random() * 20 + 5;
+        const size = Math.random() * 25 + 10;
         ctx.beginPath();
         ctx.arc(x, y, size, 0, Math.PI * 2);
         ctx.fill();
@@ -86,24 +100,24 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
     return texture;
   }, []);
 
-  // Create a simple normal texture procedurally
+  // Create enhanced normal texture
   const normalTexture = useMemo(() => {
     const canvas = document.createElement('canvas');
     canvas.width = 512;
     canvas.height = 256;
     const ctx = canvas.getContext('2d');
     if (ctx) {
-      // Create a neutral normal map (pointing up)
+      // Base normal map (pointing up)
       ctx.fillStyle = '#8080ff';
       ctx.fillRect(0, 0, 512, 256);
       
-      // Add some subtle variations
-      ctx.globalAlpha = 0.1;
-      for (let i = 0; i < 200; i++) {
+      // Add more dramatic variations for depth
+      ctx.globalAlpha = 0.3;
+      for (let i = 0; i < 300; i++) {
         const x = Math.random() * 512;
         const y = Math.random() * 256;
-        const size = Math.random() * 10 + 2;
-        ctx.fillStyle = Math.random() > 0.5 ? '#9090ff' : '#7070ff';
+        const size = Math.random() * 8 + 3;
+        ctx.fillStyle = Math.random() > 0.5 ? '#a0a0ff' : '#6060ff';
         ctx.beginPath();
         ctx.arc(x, y, size, 0, Math.PI * 2);
         ctx.fill();
@@ -126,7 +140,7 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
     });
   }, [earthTexture, nightTexture, cloudsTexture, normalTexture]);
 
-  // Earth material with shader
+  // Enhanced Earth material with futuristic shader
   const earthMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       uniforms: {
@@ -136,12 +150,14 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
         sunDirection: { value: new THREE.Vector3(1, 0.5, 0.5) },
         time: { value: 0 },
         progress: { value: 0 },
-        atmosphereColor: { value: new THREE.Color(0x87ceeb) }
+        atmosphereColor: { value: new THREE.Color(0x00ffff) },
+        glowIntensity: { value: 0.3 }
       },
       vertexShader: `
         varying vec2 vUv;
         varying vec3 vNormal;
         varying vec3 vPosition;
+        varying vec3 vWorldPosition;
         uniform float time;
         uniform float progress;
         
@@ -149,11 +165,13 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
           vUv = uv;
           vNormal = normalize(normalMatrix * normal);
           vPosition = position;
+          vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
           
-          // Subtle vertex displacement based on progress
+          // Enhanced vertex displacement with spinning effect
           vec3 pos = position;
-          float displacement = sin(position.x * 10.0 + time) * 0.002 * progress;
-          pos += normal * displacement;
+          float spinEffect = sin(position.x * 8.0 + time * 2.0) * 0.003 * (1.0 + progress);
+          float waveEffect = cos(position.y * 6.0 + time * 1.5) * 0.002 * progress;
+          pos += normal * (spinEffect + waveEffect);
           
           gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
         }
@@ -166,39 +184,49 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
         uniform float time;
         uniform float progress;
         uniform vec3 atmosphereColor;
+        uniform float glowIntensity;
         
         varying vec2 vUv;
         varying vec3 vNormal;
         varying vec3 vPosition;
+        varying vec3 vWorldPosition;
         
         void main() {
           vec3 dayColor = texture2D(dayTexture, vUv).rgb;
-          vec3 nightColor = texture2D(nightTexture, vUv).rgb * 0.3;
+          vec3 nightColor = texture2D(nightTexture, vUv).rgb * 0.8;
           vec3 normal = normalize(vNormal);
           
-          // Enhanced normal mapping
-          vec3 normalMap = texture2D(normalTexture, vUv).rgb * 2.0 - 1.0;
-          normal = normalize(normal + normalMap * 0.1);
+          // Enhanced normal mapping with animation
+          vec3 normalMap = texture2D(normalTexture, vUv + time * 0.01).rgb * 2.0 - 1.0;
+          normal = normalize(normal + normalMap * 0.2);
           
-          // Day/night transition
-          float sunDot = dot(normal, normalize(sunDirection));
-          float dayNightMix = smoothstep(-0.1, 0.1, sunDot);
+          // Dynamic day/night transition
+          vec3 sunDir = normalize(sunDirection);
+          float sunDot = dot(normal, sunDir);
+          float dayNightMix = smoothstep(-0.2, 0.2, sunDot);
           
+          // Base color mixing
           vec3 color = mix(nightColor, dayColor, dayNightMix);
           
-          // Progress-based enhancement
-          float enhancement = 1.0 + progress * 0.3;
+          // Futuristic enhancements
+          float enhancement = 1.0 + progress * 0.5;
           color *= enhancement;
           
-          // Atmospheric rim lighting
-          float atmosphere = pow(1.0 - abs(dot(normal, vec3(0.0, 0.0, 1.0))), 2.0);
-          color = mix(color, atmosphereColor * 0.8, atmosphere * 0.1 * (1.0 + progress));
+          // Atmospheric rim lighting with cyan tint
+          vec3 viewDirection = normalize(vWorldPosition - cameraPosition);
+          float rim = 1.0 - abs(dot(viewDirection, normal));
+          float atmosphere = pow(rim, 2.0);
+          color = mix(color, atmosphereColor * 1.5, atmosphere * glowIntensity * (0.3 + progress * 0.4));
           
-          // Subtle glow effect during transitions
-          if (progress > 0.2) {
-            float glow = sin(time * 2.0 + vPosition.x * 5.0) * 0.1 + 0.9;
-            color *= glow;
+          // Dynamic glow effects during transitions
+          if (progress > 0.1) {
+            float glow = sin(time * 3.0 + vPosition.x * 8.0) * 0.15 + 0.85;
+            float pulseGlow = sin(time * 1.5) * 0.1 + 0.9;
+            color *= glow * pulseGlow;
           }
+          
+          // Add subtle blue tint for futuristic feel
+          color = mix(color, color * vec3(0.9, 0.95, 1.1), 0.1);
           
           gl_FragColor = vec4(color, 1.0);
         }
@@ -206,22 +234,30 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
     });
   }, [earthTexture, nightTexture, normalTexture]);
 
-  // Atmosphere material
+  // Enhanced atmosphere material with futuristic effects
   const atmosphereMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 0 },
         progress: { value: 0 },
-        opacity: { value: 0.15 },
-        color: { value: new THREE.Color(0x87ceeb) }
+        opacity: { value: 0.2 },
+        color: { value: new THREE.Color(0x00ffff) },
+        pulseIntensity: { value: 1.0 }
       },
       vertexShader: `
         varying vec3 vNormal;
+        varying vec3 vPosition;
         uniform float progress;
+        uniform float time;
         
         void main() {
           vNormal = normalize(normalMatrix * normal);
-          vec3 pos = position * (1.0 + progress * 0.02);
+          vPosition = position;
+          
+          // Dynamic scaling based on progress with pulsing effect
+          float pulse = sin(time * 2.0) * 0.05 + 1.0;
+          vec3 pos = position * (1.0 + progress * 0.05 * pulse);
+          
           gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
         }
       `,
@@ -230,16 +266,28 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
         uniform float progress;
         uniform float opacity;
         uniform vec3 color;
+        uniform float pulseIntensity;
         varying vec3 vNormal;
+        varying vec3 vPosition;
         
         void main() {
-          float intensity = pow(0.8 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
-          vec3 atmosphere = color * intensity;
+          float intensity = pow(0.6 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.0);
           
-          float pulse = sin(time * 0.5 + progress * 2.0) * 0.2 + 0.8;
-          float progressIntensity = 1.0 + progress * 2.0;
+          // Multi-layered pulsing effect
+          float pulse1 = sin(time * 1.0 + vPosition.y * 2.0) * 0.3 + 0.7;
+          float pulse2 = cos(time * 1.5 + vPosition.x * 1.5) * 0.2 + 0.8;
+          float combinedPulse = pulse1 * pulse2;
           
-          gl_FragColor = vec4(atmosphere, opacity * intensity * pulse * progressIntensity);
+          // Progress-based intensity multiplier
+          float progressIntensity = 1.0 + progress * 3.0;
+          
+          vec3 atmosphere = color * intensity * combinedPulse * progressIntensity;
+          
+          // Add scanning lines effect
+          float scanlines = sin(vPosition.y * 50.0 + time * 5.0) * 0.05 + 0.95;
+          atmosphere *= scanlines;
+          
+          gl_FragColor = vec4(atmosphere, opacity * intensity * combinedPulse * progressIntensity * pulseIntensity);
         }
       `,
       blending: THREE.AdditiveBlending,
@@ -248,70 +296,122 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
     });
   }, []);
 
-  // Clouds material
+  // Enhanced clouds material
   const cloudsMaterial = useMemo(() => {
-    return new THREE.MeshLambertMaterial({
-      map: cloudsTexture,
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        cloudsTexture: { value: cloudsTexture },
+        time: { value: 0 },
+        progress: { value: 0 },
+        opacity: { value: 0.4 }
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        uniform float time;
+        
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D cloudsTexture;
+        uniform float time;
+        uniform float progress;
+        uniform float opacity;
+        varying vec2 vUv;
+        
+        void main() {
+          // Animated cloud movement
+          vec2 animatedUv = vUv + vec2(time * 0.02, sin(time * 0.01) * 0.01);
+          vec3 clouds = texture2D(cloudsTexture, animatedUv).rgb;
+          
+          // Add some turbulence
+          float turbulence = sin(animatedUv.x * 20.0 + time) * sin(animatedUv.y * 15.0 + time * 0.7);
+          clouds *= (0.8 + turbulence * 0.2);
+          
+          // Progress-based enhancement
+          float enhancement = 1.0 + progress * 0.5;
+          clouds *= enhancement;
+          
+          // Blue tint for futuristic look
+          clouds *= vec3(0.7, 0.9, 1.3);
+          
+          float alpha = clouds.r * opacity * (0.6 + progress * 0.4);
+          gl_FragColor = vec4(clouds, alpha);
+        }
+      `,
       transparent: true,
-      opacity: 0.3,
-      alphaMap: cloudsTexture,
-      depthWrite: false
+      depthWrite: false,
+      blending: THREE.NormalBlending
     });
   }, [cloudsTexture]);
 
-  // Animation loop
+  // Enhanced animation loop with continuous spinning
   useFrame((state) => {
     if (!meshRef.current || !groupRef.current) return;
     
     const time = state.clock.elapsedTime;
     const progress = earthProgress.get();
     
-    // Enhanced spinning - faster base rotation with progress-based acceleration
-    const baseSpeed = 0.3; // Increased from 0.1
-    const progressMultiplier = 1 + progress * 2; // Speed increases with progress
+    // ENHANCED SPINNING - Much more noticeable rotation
+    const baseSpeed = 0.8; // Increased from 0.3
+    const progressMultiplier = 1 + progress * 3; // More dramatic speed increase
+    
+    // Main Earth spinning - continuous and smooth
     meshRef.current.rotation.y = time * baseSpeed * progressMultiplier;
     
-    // Clouds rotate even faster and in opposite direction for visual interest
+    // Clouds rotate faster and in opposite direction for dynamic effect
     if (cloudsRef.current) {
-      cloudsRef.current.rotation.y = -time * 0.4 * progressMultiplier;
+      cloudsRef.current.rotation.y = -time * 1.2 * progressMultiplier;
+      cloudsRef.current.rotation.x = Math.sin(time * 0.3) * 0.1;
     }
     
-    // Atmosphere spins slower but in same direction as Earth
+    // Atmosphere spins slower but with pulsing
     if (atmosphereRef.current) {
-      atmosphereRef.current.rotation.y = time * 0.25 * progressMultiplier;
+      atmosphereRef.current.rotation.y = time * 0.6 * progressMultiplier;
+      atmosphereRef.current.rotation.z = Math.sin(time * 0.5) * 0.05;
     }
     
-    // Add subtle rotation on other axes for more dynamic movement
-    groupRef.current.rotation.x = Math.sin(time * 0.1) * 0.05;
-    groupRef.current.rotation.z = Math.cos(time * 0.15) * 0.03;
+    // Add complex rotation on multiple axes for more dynamic movement
+    groupRef.current.rotation.x = Math.sin(time * 0.2) * 0.1;
+    groupRef.current.rotation.z = Math.cos(time * 0.25) * 0.08;
     
-    // Scale and position based on progress
-    const scale = 1.0 + progress * 0.3;
-    groupRef.current.scale.setScalar(scale);
+    // Enhanced scaling and positioning based on progress
+    const scale = 1.0 + progress * 0.4;
+    const pulse = Math.sin(time * 2) * 0.02 + 1;
+    groupRef.current.scale.setScalar(scale * pulse);
     
-    // Subtle floating animation
-    groupRef.current.position.y = Math.sin(time * 0.3) * 0.05;
+    // More dramatic floating animation
+    groupRef.current.position.y = Math.sin(time * 0.4) * 0.1 + Math.cos(time * 0.6) * 0.05;
+    groupRef.current.position.x = Math.sin(time * 0.3) * 0.03;
     
-    // Camera distance based on progress
-    state.camera.position.z = 5 - progress * 1.5;
+    // Dynamic camera positioning
+    const cameraDistance = 5 - progress * 2;
+    state.camera.position.z = cameraDistance + Math.sin(time * 0.1) * 0.2;
     
     // Update shader uniforms
     earthMaterial.uniforms.time.value = time;
     earthMaterial.uniforms.progress.value = progress;
+    earthMaterial.uniforms.glowIntensity.value = 0.3 + progress * 0.5;
     
     atmosphereMaterial.uniforms.time.value = time;
     atmosphereMaterial.uniforms.progress.value = progress;
+    atmosphereMaterial.uniforms.pulseIntensity.value = 1.0 + Math.sin(time * 1.5) * 0.3;
     
-    // Update sun direction for different eras
-    const sunAngle = progress * Math.PI * 0.5;
+    cloudsMaterial.uniforms.time.value = time;
+    cloudsMaterial.uniforms.progress.value = progress;
+    
+    // Dynamic sun direction with more movement
+    const sunAngle = progress * Math.PI + time * 0.1;
     earthMaterial.uniforms.sunDirection.value.set(
       Math.cos(sunAngle),
-      Math.sin(sunAngle) * 0.5,
-      Math.sin(sunAngle)
+      Math.sin(sunAngle * 0.7) * 0.8,
+      Math.sin(sunAngle) * 0.6
     );
   });
 
-  // Handle hover effects (desktop only)
+  // Enhanced hover effects for desktop
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
       if (!groupRef.current || window.innerWidth < 768) return;
@@ -319,8 +419,9 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
       const x = (event.clientX / window.innerWidth) * 2 - 1;
       const y = -(event.clientY / window.innerHeight) * 2 + 1;
       
-      groupRef.current.rotation.x = y * 0.1;
-      groupRef.current.rotation.z = x * 0.1;
+      // More responsive mouse interaction
+      groupRef.current.rotation.x += y * 0.05;
+      groupRef.current.rotation.z += x * 0.05;
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -329,31 +430,65 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
 
   return (
     <group ref={groupRef}>
-      {/* Main Earth Sphere */}
+      {/* Enhanced lighting setup */}
+      <ambientLight intensity={0.1} color="#001122" />
+      
+      <directionalLight 
+        position={[10, 5, 5]} 
+        intensity={1.8}
+        color="#ffffff"
+        castShadow={false}
+      />
+      
+      <directionalLight 
+        position={[-5, -2, -5]} 
+        intensity={0.5}
+        color="#00aaff"
+      />
+      
+      <pointLight 
+        position={[0, 0, 8]} 
+        intensity={0.8}
+        color="#00ffff"
+        distance={25}
+      />
+
+      {/* Main Earth Sphere with enhanced geometry */}
       <mesh ref={meshRef} castShadow receiveShadow>
-        <sphereGeometry args={[1, 64, 32]} />
+        <sphereGeometry args={[1, 128, 64]} />
         <primitive object={earthMaterial} attach="material" />
       </mesh>
 
-      {/* Cloud Layer */}
+      {/* Enhanced Cloud Layer */}
       <mesh ref={cloudsRef}>
-        <sphereGeometry args={[1.005, 32, 16]} />
+        <sphereGeometry args={[1.008, 64, 32]} />
         <primitive object={cloudsMaterial} attach="material" />
       </mesh>
 
-      {/* Atmosphere */}
+      {/* Enhanced Atmosphere */}
       <mesh ref={atmosphereRef}>
-        <sphereGeometry args={[1.02, 32, 16]} />
+        <sphereGeometry args={[1.025, 64, 32]} />
         <primitive object={atmosphereMaterial} attach="material" />
       </mesh>
 
-      {/* Outer Glow */}
+      {/* Secondary Atmosphere Layer */}
       <mesh>
-        <sphereGeometry args={[1.08, 16, 8]} />
+        <sphereGeometry args={[1.04, 32, 16]} />
         <meshBasicMaterial 
-          color="#87ceeb"
+          color="#00ffff"
           transparent
-          opacity={0.03}
+          opacity={0.05}
+          side={THREE.BackSide}
+        />
+      </mesh>
+
+      {/* Outer Energy Field */}
+      <mesh>
+        <sphereGeometry args={[1.15, 16, 8]} />
+        <meshBasicMaterial 
+          color="#0080ff"
+          transparent
+          opacity={0.02}
           side={THREE.BackSide}
         />
       </mesh>
