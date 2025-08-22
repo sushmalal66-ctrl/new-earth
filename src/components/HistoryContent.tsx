@@ -38,298 +38,246 @@ interface HistoryPeriod {
 const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const periodsRef = useRef<(HTMLDivElement | null)[]>([]);
-
-  const historyPeriods: HistoryPeriod[] = [
-    {
-      id: 'big-bang',
-      era: 'Cosmic Genesis',
-      timeAgo: '13.8 Billion Years Ago',
-      title: 'The Beginning',
-      subtitle: 'Universe Emerges from Singularity',
-      description: 'In an infinitesimal moment, space and time exploded into existence. The fundamental forces separated, particles formed, and the cosmic dance began that would eventually lead to our planet.',
-      keyEvents: [
-        'Planck epoch - quantum gravity dominates',
-        'Cosmic inflation expands spacetime',
-        'First particles and antiparticles form',
-        'Nucleosynthesis creates light elements'
-      ],
-      icon: Star,
-      color: '#1e293b',
-      gradient: 'from-slate-800 via-slate-700 to-slate-900',
-      image: 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=800&h=600&fit=crop'
-    },
-    {
-      id: 'stellar-formation',
-      era: 'Stellar Genesis',
-      timeAgo: '13.6 Billion Years Ago',
-      title: 'First Light',
-      subtitle: 'Stars Illuminate the Void',
-      description: 'Gravity sculpted the first massive stars from primordial hydrogen and helium. These stellar giants lived fast and died young, forging heavy elements in their nuclear cores.',
-      keyEvents: [
-        'Population III stars ignite',
-        'Nuclear fusion creates heavier elements',
-        'Supernovae seed space with metals',
-        'First galaxies begin to form'
-      ],
-      icon: Sparkles,
-      color: '#0f172a',
-      gradient: 'from-slate-900 via-slate-800 to-gray-900',
-      image: 'https://images.unsplash.com/photo-1502134249126-9f3755a50d78?w=800&h=600&fit=crop'
-    },
-    {
-      id: 'solar-formation',
-      era: 'Solar System Birth',
-      timeAgo: '4.6 Billion Years Ago',
-      title: 'Our Star System',
-      subtitle: 'From Nebula to Planetary System',
-      description: 'A molecular cloud collapsed under its own gravity, igniting our Sun. The remaining disk of gas and dust gradually assembled into the planets, moons, and asteroids of our solar system.',
-      keyEvents: [
-        'Solar nebula gravitational collapse',
-        'Protoplanetary disk formation',
-        'Planetary accretion begins',
-        'Late Heavy Bombardment shapes worlds'
-      ],
-      icon: Globe,
-      color: '#020617',
-      gradient: 'from-slate-950 via-gray-900 to-slate-900',
-      image: 'https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=800&h=600&fit=crop'
-    },
-    {
-      id: 'formation',
-      era: 'Hadean Eon',
-      timeAgo: '4.6 - 4.0 Billion Years Ago',
-      title: 'Planetary Genesis',
-      subtitle: 'Earth Forms from Cosmic Debris',
-      description: 'Countless planetesimals collided to build our world, generating immense heat. A Mars-sized impactor created the Moon, while volcanic outgassing began forming our first atmosphere.',
-      keyEvents: [
-        'Accretion creates proto-Earth',
-        'Giant impact forms the Moon',
-        'Magma ocean solidifies',
-        'Water vapor condenses into oceans'
-      ],
-      icon: Mountain,
-      color: '#0c0a09',
-      gradient: 'from-stone-950 via-slate-950 to-gray-950',
-      image: 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=800&h=600&fit=crop'
-    },
-    {
-      id: 'archean',
-      era: 'Archean Eon',
-      timeAgo: '4.0 - 2.5 Billion Years Ago',
-      title: 'Life Awakens',
-      subtitle: 'First Organisms Emerge',
-      description: 'In warm, shallow seas, the first self-replicating molecules evolved into primitive cells. These early microbes began photosynthesis, forever changing our planet\'s chemistry.',
-      keyEvents: [
-        'RNA world gives way to DNA life',
-        'Prokaryotic cells dominate oceans',
-        'Cyanobacteria evolve photosynthesis',
-        'Stromatolites preserve ancient life'
-      ],
-      icon: Waves,
-      color: '#030712',
-      gradient: 'from-gray-950 via-slate-950 to-stone-950',
-      image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&h=600&fit=crop'
-    },
-    {
-      id: 'proterozoic',
-      era: 'Proterozoic Eon',
-      timeAgo: '2.5 - 0.54 Billion Years Ago',
-      title: 'Oxygen Revolution',
-      subtitle: 'Atmosphere Transforms',
-      description: 'Photosynthetic bacteria flooded the atmosphere with oxygen, triggering Earth\'s first mass extinction. This toxic gas became the foundation for complex, oxygen-breathing life.',
-      keyEvents: [
-        'Great Oxidation Event transforms atmosphere',
-        'Eukaryotic cells with nuclei evolve',
-        'Snowball Earth ice ages occur',
-        'Sexual reproduction develops'
-      ],
-      icon: Leaf,
-      color: '#020617',
-      gradient: 'from-slate-950 via-gray-950 to-stone-950',
-      image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop'
-    },
-    {
-      id: 'cambrian',
-      era: 'Cambrian Explosion',
-      timeAgo: '541 - 485 Million Years Ago',
-      title: 'Evolutionary Explosion',
-      subtitle: 'Complex Life Emerges',
-      description: 'In just 25 million years, life exploded into incredible diversity. Eyes evolved, predators emerged, and the arms race between hunter and prey began in earnest.',
-      keyEvents: [
-        'Camera eyes evolve independently',
-        'Mineralized shells and skeletons appear',
-        'Predation drives evolutionary arms race',
-        'All major animal body plans established'
-      ],
-      icon: Shield,
-      color: '#0c0a09',
-      gradient: 'from-stone-950 via-slate-950 to-gray-950',
-      image: 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=800&h=600&fit=crop'
-    },
-    {
-      id: 'ordovician',
-      era: 'Ordovician Period',
-      timeAgo: '485 - 444 Million Years Ago',
-      title: 'Marine Dominance',
-      subtitle: 'Seas Teem with Life',
-      description: 'Marine ecosystems reached new levels of complexity. Coral reefs flourished, cephalopods ruled as apex predators, and the first vertebrates with jaws evolved.',
-      keyEvents: [
-        'Great Ordovician Biodiversification',
-        'First coral reefs form',
-        'Nautiloid cephalopods dominate',
-        'Ordovician-Silurian extinction event'
-      ],
-      icon: Mountain,
-      color: '#030712',
-      gradient: 'from-gray-950 via-slate-950 to-stone-950',
-      image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&h=600&fit=crop'
-    },
-    {
-      id: 'devonian',
-      era: 'Devonian Period',
-      timeAgo: '419 - 359 Million Years Ago',
-      title: 'Age of Fishes',
-      subtitle: 'Life Conquers Land',
-      description: 'The first forests transformed barren landscapes while armored fish ruled the seas. Tetrapods took their first steps on land, beginning the vertebrate conquest of terrestrial environments.',
-      keyEvents: [
-        'First seed plants and forests evolve',
-        'Armored placoderm fish dominate',
-        'Tetrapods evolve from lobe-finned fish',
-        'Late Devonian extinction reduces diversity'
-      ],
-      icon: Leaf,
-      color: '#020617',
-      gradient: 'from-slate-950 via-gray-950 to-stone-950',
-      image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=600&fit=crop'
-    },
-    {
-      id: 'carboniferous',
-      era: 'Carboniferous Period',
-      timeAgo: '359 - 299 Million Years Ago',
-      title: 'Coal Forest Era',
-      subtitle: 'Oxygen-Rich World',
-      description: 'Vast swamp forests covered the land, eventually forming coal deposits. High oxygen levels allowed giant insects to thrive, while the first reptiles evolved from amphibians.',
-      keyEvents: [
-        'Extensive coal swamp forests',
-        'Oxygen levels reach 35%',
-        'Giant arthropods evolve',
-        'First reptiles appear'
-      ],
-      icon: Leaf,
-      color: '#0c0a09',
-      gradient: 'from-stone-950 via-slate-950 to-gray-950',
-      image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop'
-    },
-    {
-      id: 'permian',
-      era: 'Permian-Triassic',
-      timeAgo: '299 - 201 Million Years Ago',
-      title: 'The Great Dying',
-      subtitle: 'Life\'s Greatest Crisis',
-      description: 'The Siberian Traps erupted for millions of years, triggering the most severe extinction in Earth\'s history. 96% of marine species vanished, resetting the evolutionary clock.',
-      keyEvents: [
-        'Siberian Traps flood basalt eruptions',
-        'Permian-Triassic extinction event',
-        '96% of marine species extinct',
-        'Archosaurs begin to diversify'
-      ],
-      icon: Zap,
-      color: '#030712',
-      gradient: 'from-gray-950 via-slate-950 to-stone-950',
-      image: 'https://images.unsplash.com/photo-1541872703-74c5e44368e6?w=800&h=600&fit=crop'
-    },
-    {
-      id: 'mesozoic',
-      era: 'Mesozoic Era',
-      timeAgo: '252 - 66 Million Years Ago',
-      title: 'Age of Reptiles',
-      subtitle: 'Dinosaurs Rule the Earth',
-      description: 'From the ashes of the Great Dying, dinosaurs rose to dominate land, sea, and sky. Flowering plants evolved, transforming terrestrial ecosystems and co-evolving with insects.',
-      keyEvents: [
-        'Dinosaurs diversify and dominate',
-        'First mammals appear',
-        'Flowering plants (angiosperms) evolve',
-        'Pangaea breaks apart'
-      ],
-      icon: Shield,
-      color: '#020617',
-      gradient: 'from-slate-950 via-gray-950 to-stone-950',
-      image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=600&fit=crop'
-    },
-    {
-      id: 'cretaceous-extinction',
-      era: 'K-Pg Extinction',
-      timeAgo: '66 Million Years Ago',
-      title: 'Asteroid Impact',
-      subtitle: 'End of the Dinosaur Age',
-      description: 'A 10-kilometer asteroid struck the Yucatan Peninsula, ending the reign of non-avian dinosaurs. This catastrophe opened ecological niches for mammals to diversify and eventually dominate.',
-      keyEvents: [
-        'Chicxulub asteroid impact',
-        'Global firestorms and nuclear winter',
-        'Non-avian dinosaurs extinct',
-        'Mammalian radiation begins'
-      ],
-      icon: Zap,
-      color: '#0c0a09',
-      gradient: 'from-stone-950 via-slate-950 to-gray-950',
-      image: 'https://images.unsplash.com/photo-1541872703-74c5e44368e6?w=800&h=600&fit=crop'
-    },
-    {
-      id: 'cenozoic',
-      era: 'Cenozoic Era',
-      timeAgo: '66 Million Years Ago - Present',
-      title: 'Age of Mammals',
-      subtitle: 'Rise of Modern Life',
-      description: 'Mammals rapidly diversified to fill empty ecological niches. Grasses evolved, creating new ecosystems. Climate cooled, ice ages began, and eventually, primates appeared.',
-      keyEvents: [
-        'Mammalian adaptive radiation',
-        'Grasses and grasslands evolve',
-        'Global cooling and ice ages',
-        'Primate evolution begins'
-      ],
-      icon: Users,
-      color: '#030712',
-      gradient: 'from-gray-950 via-slate-950 to-stone-950',
-      image: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=800&h=600&fit=crop'
-    },
-    {
-      id: 'human-evolution',
-      era: 'Human Evolution',
-      timeAgo: '7 Million Years Ago - Present',
-      title: 'Rise of Intelligence',
-      subtitle: 'From Apes to Civilization',
-      description: 'In Africa, apes descended from trees and began walking upright. Larger brains evolved, tools were crafted, and language developed, leading to the emergence of modern humans.',
-      keyEvents: [
-        'Bipedalism evolves in hominins',
-        'Brain size increases dramatically',
-        'Stone tool technology develops',
-        'Homo sapiens emerges in Africa'
-      ],
-      icon: Users,
-      color: '#020617',
-      gradient: 'from-slate-950 via-gray-950 to-stone-950',
-      image: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=800&h=600&fit=crop'
-    },
-    {
-      id: 'anthropocene',
-      era: 'Anthropocene',
-      timeAgo: '12,000 Years Ago - Present',
-      title: 'Human Dominance',
-      subtitle: 'Civilization Transforms Earth',
-      description: 'Agriculture enabled permanent settlements and population growth. The Industrial Revolution accelerated human impact, making our species a geological force comparable to volcanoes and glaciers.',
-      keyEvents: [
-        'Agricultural revolution begins',
-        'Cities and civilizations emerge',
-        'Industrial Revolution transforms society',
-        'Human impact rivals geological forces'
-      ],
-      icon: Globe,
-      color: '#0c0a09',
-      gradient: 'from-stone-950 via-slate-950 to-gray-950',
-      image: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=800&h=600&fit=crop'
-    }
-  ];
-
+const historyPeriods: HistoryPeriod[] = [
+  {
+    id: 'big-bang',
+    era: 'Cosmic Genesis',
+    timeAgo: '13.8 Billion Years Ago',
+    title: 'The Beginning',
+    subtitle: 'Universe Emerges',
+    description: 'Space and time burst into existence. Matter, energy, and the fundamental forces were born, setting the stage for galaxies, stars, and eventually Earth.',
+    keyEvents: [
+      'Big Bang & cosmic inflation',
+      'First particles and light elements',
+      'Formation of galaxies begins'
+    ],
+    icon: Star,
+    color: '#1e293b',
+    gradient: 'from-slate-800 via-slate-700 to-slate-900',
+    image: 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=800&h=600&fit=crop'
+  },
+  {
+    id: 'stellar-formation',
+    era: 'First Stars',
+    timeAgo: '13.6 Billion Years Ago',
+    title: 'First Light',
+    subtitle: 'Stars Ignite',
+    description: 'Gravity forged the first stars from hydrogen and helium. These giants lived fast, died young, and seeded the cosmos with heavy elements.',
+    keyEvents: [
+      'First stars (Pop III) ignite',
+      'Supernovae enrich the cosmos',
+      'Galaxies assemble'
+    ],
+    icon: Sparkles,
+    color: '#0f172a',
+    gradient: 'from-slate-900 via-slate-800 to-gray-900',
+    image: 'https://images.unsplash.com/photo-1502134249126-9f3755a50d78?w=800&h=600&fit=crop'
+  },
+  {
+    id: 'solar-formation',
+    era: 'Solar Birth',
+    timeAgo: '4.6 Billion Years Ago',
+    title: 'Our Solar System',
+    subtitle: 'From Dust to Planets',
+    description: 'A collapsing nebula formed the Sun, with planets, moons, and asteroids emerging from the leftover disk of dust and gas.',
+    keyEvents: [
+      'Sun ignites',
+      'Planets accrete from disk',
+      'Late Heavy Bombardment reshapes worlds'
+    ],
+    icon: Globe,
+    color: '#020617',
+    gradient: 'from-slate-950 via-gray-900 to-slate-900',
+    image: 'https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=800&h=600&fit=crop'
+  },
+  {
+    id: 'hadean',
+    era: 'Hadean Eon',
+    timeAgo: '4.6 - 4.0 Billion Years Ago',
+    title: 'Earth Forms',
+    subtitle: 'A Fiery Birth',
+    description: 'Colliding planetesimals created Earth. A Mars-sized impact birthed the Moon, while early oceans condensed from volcanic steam.',
+    keyEvents: [
+      'Moon-forming impact',
+      'Magma oceans cool',
+      'First oceans appear'
+    ],
+    icon: Mountain,
+    color: '#0c0a09',
+    gradient: 'from-stone-950 via-slate-950 to-gray-950',
+    image: 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=800&h=600&fit=crop'
+  },
+  {
+    id: 'archean',
+    era: 'Archean Eon',
+    timeAgo: '4.0 - 2.5 Billion Years Ago',
+    title: 'Life Begins',
+    subtitle: 'Cells Emerge',
+    description: 'In Earth’s early oceans, simple microbes evolved. Cyanobacteria learned photosynthesis, slowly oxygenating the atmosphere.',
+    keyEvents: [
+      'First cells evolve',
+      'Stromatolites form',
+      'Oxygenation begins'
+    ],
+    icon: Waves,
+    color: '#030712',
+    gradient: 'from-gray-950 via-slate-950 to-stone-950',
+    image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&h=600&fit=crop'
+  },
+  {
+    id: 'proterozoic',
+    era: 'Proterozoic Eon',
+    timeAgo: '2.5 - 0.54 Billion Years Ago',
+    title: 'Oxygen Revolution',
+    subtitle: 'Atmosphere Transforms',
+    description: 'Oxygen flooded the air, triggering extinctions but enabling complex life. Eukaryotes and sexual reproduction evolved, paving the way for animals.',
+    keyEvents: [
+      'Great Oxidation Event',
+      'Eukaryotic cells evolve',
+      'Snowball Earth glaciations'
+    ],
+    icon: Leaf,
+    color: '#020617',
+    gradient: 'from-slate-950 via-gray-950 to-stone-950',
+    image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop'
+  },
+  {
+    id: 'cambrian',
+    era: 'Cambrian Explosion',
+    timeAgo: '541 - 485 Million Years Ago',
+    title: 'Animal Explosion',
+    subtitle: 'Complex Life Emerges',
+    description: 'Animal diversity exploded. Eyes evolved, predators appeared, and most modern body plans were established.',
+    keyEvents: [
+      'Cambrian Explosion',
+      'Predators evolve',
+      'Shells & skeletons appear'
+    ],
+    icon: Shield,
+    color: '#0c0a09',
+    gradient: 'from-stone-950 via-slate-950 to-gray-950',
+    image: 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=800&h=600&fit=crop'
+  },
+  {
+    id: 'devonian',
+    era: 'Devonian Period',
+    timeAgo: '419 - 359 Million Years Ago',
+    title: 'Life Conquers Land',
+    subtitle: 'Forests & Tetrapods',
+    description: 'Fish dominated oceans, while the first forests appeared. Vertebrates took their first steps onto land.',
+    keyEvents: [
+      'First forests grow',
+      'Tetrapods evolve',
+      'Late Devonian extinction'
+    ],
+    icon: Leaf,
+    color: '#020617',
+    gradient: 'from-slate-950 via-gray-950 to-stone-950',
+    image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=600&fit=crop'
+  },
+  {
+    id: 'permian',
+    era: 'Permian',
+    timeAgo: '299 - 252 Million Years Ago',
+    title: 'The Great Dying',
+    subtitle: 'Mass Extinction',
+    description: 'Massive volcanic eruptions caused Earth’s worst extinction event, wiping out 90% of species.',
+    keyEvents: [
+      'Siberian Traps eruptions',
+      'Permian-Triassic extinction',
+      'Archosaurs diversify'
+    ],
+    icon: Zap,
+    color: '#030712',
+    gradient: 'from-gray-950 via-slate-950 to-stone-950',
+    image: 'https://images.unsplash.com/photo-1541872703-74c5e44368e6?w=800&h=600&fit=crop'
+  },
+  {
+    id: 'mesozoic',
+    era: 'Mesozoic Era',
+    timeAgo: '252 - 66 Million Years Ago',
+    title: 'Age of Dinosaurs',
+    subtitle: 'Reptiles Rule',
+    description: 'Dinosaurs, pterosaurs, and giant reptiles ruled land, sea, and sky. Flowering plants and mammals first appeared.',
+    keyEvents: [
+      'Dinosaurs dominate',
+      'First mammals evolve',
+      'Flowering plants emerge'
+    ],
+    icon: Shield,
+    color: '#020617',
+    gradient: 'from-slate-950 via-gray-950 to-stone-950',
+    image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=600&fit=crop'
+  },
+  {
+    id: 'cretaceous-extinction',
+    era: 'K-Pg Extinction',
+    timeAgo: '66 Million Years Ago',
+    title: 'Dinosaur Doom',
+    subtitle: 'Asteroid Impact',
+    description: 'A massive asteroid struck Earth, ending the dinosaur age and clearing the stage for mammals.',
+    keyEvents: [
+      'Chicxulub impact',
+      'Dinosaurs wiped out',
+      'Mammals rise'
+    ],
+    icon: Zap,
+    color: '#0c0a09',
+    gradient: 'from-stone-950 via-slate-950 to-gray-950',
+    image: 'https://images.unsplash.com/photo-1541872703-74c5e44368e6?w=800&h=600&fit=crop'
+  },
+  {
+    id: 'cenozoic',
+    era: 'Cenozoic',
+    timeAgo: '66 Million Years Ago - Present',
+    title: 'Age of Mammals',
+    subtitle: 'Modern Ecosystems',
+    description: 'Mammals, birds, and flowering plants flourished. Ice ages shaped the land, while primates evolved into humans.',
+    keyEvents: [
+      'Mammalian radiation',
+      'Ice ages shape climate',
+      'Primates evolve'
+    ],
+    icon: Users,
+    color: '#030712',
+    gradient: 'from-gray-950 via-slate-950 to-stone-950',
+    image: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=800&h=600&fit=crop'
+  },
+  {
+    id: 'human-evolution',
+    era: 'Human Evolution',
+    timeAgo: '7 Million Years Ago - Present',
+    title: 'Rise of Humans',
+    subtitle: 'Intelligence Emerges',
+    description: 'Bipedal apes evolved into toolmakers with large brains. Homo sapiens emerged in Africa, eventually building civilizations.',
+    keyEvents: [
+      'Bipedalism',
+      'Stone tools',
+      'Homo sapiens evolve'
+    ],
+    icon: Users,
+    color: '#020617',
+    gradient: 'from-slate-950 via-gray-950 to-stone-950',
+    image: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=800&h=600&fit=crop'
+  },
+  {
+    id: 'anthropocene',
+    era: 'Anthropocene',
+    timeAgo: '12,000 Years Ago - Present',
+    title: 'Human Dominance',
+    subtitle: 'Planet Shapers',
+    description: 'Agriculture, cities, and industry transformed Earth. Humanity became a geological force, reshaping the biosphere and climate.',
+    keyEvents: [
+      'Agriculture & cities',
+      'Industrial Revolution',
+      'Climate change impact'
+    ],
+    icon: Globe,
+    color: '#0c0a09',
+    gradient: 'from-stone-950 via-slate-950 to-gray-950',
+    image: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=800&h=600&fit=crop'
+  }
+];
   useEffect(() => {
     if (!contentRef.current) return;
 
