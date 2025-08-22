@@ -355,7 +355,7 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
     const progress = earthProgress.get();
     
     // CONTINUOUS SPINNING ON Y-AXIS (Earth's rotation)
-    const baseRotationSpeed = 1.5; // Steady rotation speed around Y-axis
+    const baseRotationSpeed = 0.3; // Steady rotation speed around Y-axis
     const scrollSpeedMultiplier = 1 + progress * 0.5; // Slight speed increase with scroll
     
     // Main Earth spinning on Y-axis (like real Earth rotation)
