@@ -281,7 +281,7 @@ const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
         if (trigger.vars.trigger === container || trigger.vars.containerAnimation === horizontalScroll) {
           trigger.kill();
         }
-      });
+      }, [activeEra, timelineEras.length]); // Removed earthProgress and onProgressChange from dependencies
     };
   }, [earthProgress, onProgressChange, activeEra, timelineEras.length]);
 
