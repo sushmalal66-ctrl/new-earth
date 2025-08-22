@@ -107,6 +107,7 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
         time: { value: 0 },
         progress: { value: 0 },
         atmosphereColor: { value: new THREE.Color(0x87ceeb) }
+      }
       vertexShader: `
         varying vec2 vUv;
         varying vec3 vNormal;
