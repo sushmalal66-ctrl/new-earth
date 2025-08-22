@@ -12,9 +12,9 @@ import {
   Mountain, 
   Waves,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Shield
 } from 'lucide-react';
-
 gsap.registerPlugin(ScrollTrigger);
 
 interface HistoryContentProps {
@@ -40,96 +40,168 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
   const periodsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   const historyPeriods: HistoryPeriod[] = [
-    {
-      id: 'formation',
-      era: 'Hadean Eon',
-      timeAgo: '4.6 Billion Years Ago',
-      title: 'Birth of Our World',
-      subtitle: 'From Cosmic Dust to Molten Planet',
-      description: 'Earth formed from the gravitational collapse of dust and gas within the solar nebula. This was a time of incredible heat, constant bombardment, and the formation of our planet\'s basic structure.',
+ {
+      id: 'big-bang',
+      era: 'Big Bang Era',
+      timeAgo: '13.8 Billion Years Ago',
+      title: 'Genesis of Everything',
+      subtitle: 'The Universe Ignites',
+      description: 'In a singular moment of infinite density and temperature, space and time itself began. The fundamental forces of nature separated, and the first particles formed in the cosmic soup of pure energy.',
       keyEvents: [
-        'Formation from solar nebula',
-        'Differentiation into core and mantle',
-        'Formation of the Moon',
-        'Development of early atmosphere'
+        'Planck epoch - quantum gravity dominates',
+        'Inflation - exponential expansion',
+        'Nucleosynthesis - first atoms form',
+        'Cosmic microwave background emerges'
       ],
       icon: Star,
       color: '#64748b',
-      gradient: 'from-slate-600 to-slate-500',
+      gradient: 'from-slate-600 via-slate-500 to-gray-600',
       image: 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=800&h=600&fit=crop'
     },
     {
-      id: 'oceans',
-      era: 'Archean Eon',
-      timeAgo: '4.0 Billion Years Ago',
-      title: 'The Great Waters',
-      subtitle: 'Birth of Earth\'s Oceans',
-      description: 'As Earth cooled, water vapor condensed to form vast oceans. This marked the beginning of the water cycle and created the conditions necessary for life to emerge.',
+      id: 'stellar-formation',
+      era: 'Stellar Formation',
+      timeAgo: '13.6 Billion Years Ago',
+      title: 'Birth of the First Stars',
+      subtitle: 'Lighting the Dark Universe',
+      description: 'Gravity pulled together the first hydrogen and helium, forming massive stars that burned bright and fast. Their deaths in spectacular supernovae forged the heavier elements essential for planets and life.',
       keyEvents: [
-        'Formation of stable oceans',
-        'Development of water cycle',
-        'First continental crust',
-        'Emergence of hydrothermal vents'
+        'First generation stars ignite',
+        'Nuclear fusion begins element creation',
+        'Supernova explosions scatter heavy elements',
+        'Galactic structures start forming'
       ],
-      icon: Waves,
+      icon: Sparkles,
       color: '#475569',
-      gradient: 'from-slate-700 to-blue-600',
-      image: 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=800&h=600&fit=crop'
+      gradient: 'from-slate-700 via-blue-600 to-slate-600',
+      image: 'https://images.unsplash.com/photo-1502134249126-9f3755a50d78?w=800&h=600&fit=crop'
     },
     {
-      id: 'life',
-      era: 'Proterozoic Eon',
-      timeAgo: '2.5 Billion Years Ago',
-      title: 'The Oxygen Revolution',
-      subtitle: 'Life Transforms the Planet',
-      description: 'Cyanobacteria began producing oxygen through photosynthesis, fundamentally changing Earth\'s atmosphere and paving the way for complex life forms.',
+      id: 'solar-formation',
+      era: 'Solar System Formation',
+      timeAgo: '4.6 Billion Years Ago',
+      title: 'Our Cosmic Neighborhood',
+      subtitle: 'From Dust to Planets',
+      description: 'Within a collapsing cloud of gas and dust, our Sun ignited. The remaining material swirled into a disk, gradually coalescing into the planets, moons, and asteroids that make up our solar system.',
       keyEvents: [
-        'Great Oxidation Event',
-        'Formation of ozone layer',
-        'First eukaryotic cells',
-        'Snowball Earth periods'
+        'Solar nebula collapse begins',
+        'Protoplanetary disk formation',
+        'Planetary accretion process',
+        'Late Heavy Bombardment period'
       ],
-      icon: Leaf,
+      icon: Globe,
       color: '#334155',
-      gradient: 'from-slate-800 to-blue-700',
-      image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop'
+      gradient: 'from-slate-800 via-blue-700 to-slate-700',
+      image: 'https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=800&h=600&fit=crop'
     },
     {
-      id: 'complex',
-      era: 'Phanerozoic Eon',
-      timeAgo: '541 Million Years Ago',
-      title: 'Explosion of Life',
-      subtitle: 'The Cambrian Revolution',
-      description: 'The Cambrian explosion saw the rapid diversification of life forms, with most major animal phyla appearing in the fossil record within a relatively short time.',
+      id: 'formation',
+      era: 'Hadean Eon',
+      timeAgo: '4.6 - 4.0 Billion Years Ago',
+      title: 'Earth\'s Violent Birth',
+      subtitle: 'From Molten Hell to Cooling World',
+      description: 'Earth formed from cosmic collisions, creating a molten hellscape. The Moon was born from a Mars-sized impact, and slowly our planet began to cool as water vapor condensed into the first oceans.',
       keyEvents: [
-        'Cambrian explosion of species',
-        'Evolution of complex organisms',
-        'Development of ecosystems',
-        'First vertebrates appear'
+        'Earth forms from planetesimal collisions',
+        'Moon-forming impact event',
+        'Atmospheric evolution begins',
+        'First oceans condense from vapor'
       ],
       icon: Mountain,
       color: '#1e293b',
-      gradient: 'from-slate-900 to-blue-800',
+      gradient: 'from-slate-900 via-gray-800 to-slate-800',
+      image: 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=800&h=600&fit=crop'
+    },
+    {
+      id: 'archean',
+      era: 'Archean Eon',
+      timeAgo: '4.0 - 2.5 Billion Years Ago',
+      title: 'Dawn of Life',
+      subtitle: 'First Living Cells Emerge',
+      description: 'In primordial oceans, the first life forms appeared. Simple bacteria and archaea began the long journey of evolution, setting the stage for all future biological complexity.',
+      keyEvents: [
+        'First prokaryotic cells emerge',
+        'Stromatolites form in shallow seas',
+        'Photosynthesis begins to evolve',
+        'Continental crust stabilizes'
+      ],
+      icon: Waves,
+      color: '#0f172a',
+      gradient: 'from-slate-950 via-blue-900 to-slate-900',
+      image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&h=600&fit=crop'
+    },
+    {
+      id: 'proterozoic',
+      era: 'Proterozoic Eon',
+      timeAgo: '2.5 - 0.54 Billion Years Ago',
+      title: 'The Great Oxidation',
+      subtitle: 'Oxygen Transforms Everything',
+      description: 'Cyanobacteria revolutionized Earth by producing oxygen, causing a mass extinction but enabling complex life. The first eukaryotic cells evolved, leading to multicellular organisms.',
+      keyEvents: [
+        'Great Oxidation Event occurs',
+        'First eukaryotic cells evolve',
+        'Snowball Earth glaciation periods',
+        'First multicellular life appears'
+      ],
+      icon: Leaf,
+      color: '#0c0c0f',
+      gradient: 'from-slate-950 via-blue-950 to-gray-950',
+      image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop'
+    },
+    {
+      id: 'cambrian',
+      era: 'Cambrian Explosion',
+      timeAgo: '541 - 485 Million Years Ago',
+      title: 'Life\'s Great Experiment',
+      subtitle: 'Biodiversity Explodes',
+      description: 'In a geological instant, life exploded into countless forms. Eyes, shells, and complex body plans appeared for the first time, creating the foundation for all modern animal life.',
+      keyEvents: [
+        'Complex eyes and vision evolve',
+        'Hard shells and exoskeletons develop',
+        'Predator-prey relationships emerge',
+        'Most modern animal phyla appear'
+      ],
+      icon: Shield,
+      color: '#080808',
+      gradient: 'from-black via-slate-900 to-gray-900',
       image: 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=800&h=600&fit=crop'
     },
     {
-      id: 'modern',
-      era: 'Anthropocene',
-      timeAgo: 'Present Day',
-      title: 'Age of Humanity',
-      subtitle: 'Shaping Our Planet\'s Future',
-      description: 'Humans have become a geological force, influencing climate, ecosystems, and the planet\'s future evolution. We now hold the responsibility for Earth\'s stewardship.',
+      id: 'devonian',
+      era: 'Devonian Period',
+      timeAgo: '419 - 359 Million Years Ago',
+      title: 'Conquest of Land',
+      subtitle: 'From Sea to Shore',
+      description: 'Life made its first tentative steps onto land. Plants developed root systems and woody tissue, while the first amphibians evolved from fish, beginning the colonization of terrestrial environments.',
       keyEvents: [
-        'Global civilization emerges',
-        'Technological revolution',
-        'Climate change awareness',
-        'Space exploration begins'
+        'First forests appear on land',
+        'Fish develop primitive lungs',
+        'Amphibians evolve from fish',
+        'Soil ecosystems develop'
       ],
-      icon: Users,
-      color: '#0f172a',
-      gradient: 'from-slate-950 to-blue-900',
-      image: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=800&h=600&fit=crop'
-    }
+      icon: Mountain,
+      color: '#050507',
+      gradient: 'from-black via-slate-950 to-blue-950',
+      image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=600&fit=crop'
+    },
+  {
+  id: 'permian',
+  era: 'Permian-Triassic',
+  timeAgo: '299 - 201 Million Years Ago',
+  title: 'The Great Dying',
+  subtitle: 'Earth’s Most Severe Extinction',
+  description: 'Massive volcanic eruptions and climate shifts led to the largest extinction event in history, wiping out 90% of species. This reset life on Earth and paved the way for dinosaurs.',
+  keyEvents: [
+    'Siberian Traps volcanic eruptions',
+    '90% of species extinct',
+    'Collapse of marine ecosystems',
+    'Rise of archosaurs'
+  ],
+  icon: Zap,
+  color: '#020617',
+  gradient: 'from-slate-950 via-red-900 to-black',
+  image: 'https://images.unsplash.com/photo-1541872703-74c5e44368e6?w=800&h=600&fit=crop'
+}
   ];
 
   useEffect(() => {
@@ -368,6 +440,7 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
                       <img 
                         src={period.image}
                         alt={period.title}
+                         loading="lazy" 
                         className="period-image w-full h-80 md:h-96 object-cover group-hover:scale-110 transition-transform duration-700"
                       />
                       
