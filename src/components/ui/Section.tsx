@@ -202,9 +202,14 @@ const Section: React.FC<SectionProps> = ({
                       <span className="text-2xl font-bold text-white">{index + 1}</span>
                     </div>
                     <p className="text-slate-400 text-sm">
-                      Interactive visualization for<br />
+                      Era visualization<br />
                       <span className="text-cyan-300">{era}</span>
                     </p>
+                    
+                    {/* Simple visual representation */}
+                    <div className="w-full h-32 bg-gradient-to-b from-transparent via-cyan-500/20 to-transparent rounded-lg flex items-center justify-center">
+                      <div className={`w-12 h-12 bg-gradient-to-r ${getGradientClass(index)} rounded-full animate-pulse`} />
+                    </div>
                   </div>
                 </div>
 

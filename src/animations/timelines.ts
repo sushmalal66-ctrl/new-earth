@@ -7,94 +7,76 @@ export const initializeTimelines = (container: HTMLElement) => {
   // Clear existing ScrollTriggers
   ScrollTrigger.getAll().forEach(trigger => trigger.kill());
 
-  // Main timeline for Earth transformations
-  const earthTimeline = gsap.timeline({
-    scrollTrigger: {
-      trigger: container,
-      start: "top top",
-      end: "bottom bottom",
-      scrub: 1,
-      invalidateOnRefresh: true,
-      refreshPriority: 1
-    }
-  });
-
   // Section-based animations
   const sections = container.querySelectorAll('[data-section]');
   
   sections.forEach((section, index) => {
     const sectionElement = section as HTMLElement;
     
-    // Parallax effects for each section
-    gsap.set(sectionElement, { willChange: 'transform' });
+    // Set initial state
+    gsap.set(sectionElement, { 
+      willChange: 'transform',
+      opacity: 0,
+      y: 50
+    });
     
     // Section entrance animation
     ScrollTrigger.create({
       trigger: sectionElement,
       start: "top 80%",
       end: "top 20%",
+      toggleActions: "play none none reverse",
       onEnter: () => {
         gsap.to(sectionElement, {
           opacity: 1,
           y: 0,
           duration: 1.2,
-          ease: "power2.out"
+          ease: "power2.out",
+          overwrite: "auto"
         });
       },
       onLeave: () => {
         gsap.to(sectionElement, {
           opacity: 0.7,
-          duration: 0.5
+          duration: 0.5,
+          overwrite: "auto"
         });
       },
       onEnterBack: () => {
         gsap.to(sectionElement, {
           opacity: 1,
-          duration: 0.5
+          duration: 0.5,
+          overwrite: "auto"
         });
       }
-    });
-
-    // Parallax for background elements
-    const bgElements = sectionElement.querySelectorAll('[class*="absolute"]');
-    bgElements.forEach((element, bgIndex) => {
-      const speed = 0.5 + (bgIndex * 0.2);
-      
-      gsap.to(element, {
-        y: -100 * speed,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionElement,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: true,
-          invalidateOnRefresh: true
-        }
-      });
     });
 
     // Text reveal animations
     const textElements = sectionElement.querySelectorAll('h2, h3, p');
     textElements.forEach((text, textIndex) => {
-      gsap.set(text, { willChange: 'transform' });
+      gsap.set(text, { 
+        willChange: 'transform',
+        opacity: 0,
+        y: 30
+      });
       
       ScrollTrigger.create({
         trigger: text,
         start: "top 85%",
+        toggleActions: "play none none reverse",
         onEnter: () => {
           gsap.fromTo(text, 
             { 
               opacity: 0, 
-              y: 50,
-              rotationX: 15
+              y: 30
             },
             {
               opacity: 1,
               y: 0,
-              rotationX: 0,
               duration: 1,
               delay: textIndex * 0.1,
-              ease: "power2.out"
+              ease: "power2.out",
+              overwrite: "auto"
             }
           );
         }
@@ -102,11 +84,12 @@ export const initializeTimelines = (container: HTMLElement) => {
     });
   });
 
-  // Smooth section transitions
+  // Global scroll progress tracking
   ScrollTrigger.create({
     trigger: container,
     start: "top top",
     end: "bottom bottom",
+    scrub: true,
     onUpdate: (self) => {
       const progress = self.progress;
       
@@ -120,46 +103,10 @@ export const initializeTimelines = (container: HTMLElement) => {
     }
   });
 
-  // Performance optimization: batch DOM updates
-  ScrollTrigger.batch('[data-animate]', {
-    onEnter: (elements) => {
-      gsap.fromTo(elements, 
-        { 
-          opacity: 0, 
-          y: 100,
-          scale: 0.95
-        },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 1,
-          stagger: 0.1,
-          ease: "power2.out",
-          overwrite: "auto"
-        }
-      );
-    },
-    onLeave: (elements) => {
-      gsap.to(elements, {
-        opacity: 0.3,
-        scale: 0.98,
-        duration: 0.3,
-        overwrite: "auto"
-      });
-    },
-    onEnterBack: (elements) => {
-      gsap.to(elements, {
-        opacity: 1,
-        scale: 1,
-        duration: 0.3,
-        overwrite: "auto"
-      });
-    }
-  });
-
   // Refresh ScrollTrigger after setup
-  ScrollTrigger.refresh();
+  setTimeout(() => {
+    ScrollTrigger.refresh();
+  }, 100);
 };
 
 // Utility function to create smooth scroll-to animations

@@ -14,36 +14,99 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
   const cloudsRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   
-  // Load textures
-  const [dayTexture, nightTexture, cloudsTexture, normalTexture] = useLoader(TextureLoader, [
-    'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=2048&h=1024&fit=crop',
-    'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=2048&h=1024&fit=crop',
-    'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=2048&h=1024&fit=crop',
-    'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=1024&h=512&fit=crop'
-  ]);
+  // Load textures - using local earth.jpg asset
+  const earthTexture = useLoader(TextureLoader, '/assets/earth.jpg');
 
   // Configure textures
   useMemo(() => {
-    [dayTexture, nightTexture, cloudsTexture, normalTexture].forEach(texture => {
+    if (earthTexture) {
+      earthTexture.wrapS = THREE.RepeatWrapping;
+      earthTexture.wrapT = THREE.RepeatWrapping;
+      earthTexture.anisotropy = 16;
+      earthTexture.generateMipmaps = true;
+    }
+  }, [earthTexture]);
+
+  // Create a simple night texture procedurally
+  const nightTexture = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      // Create a dark blue gradient
+      const gradient = ctx.createLinearGradient(0, 0, 512, 256);
+      gradient.addColorStop(0, '#001122');
+      gradient.addColorStop(0.5, '#002244');
+      gradient.addColorStop(1, '#001122');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 512, 256);
+      
+      // Add some city lights
+      ctx.fillStyle = '#ffaa00';
+      for (let i = 0; i < 50; i++) {
+        const x = Math.random() * 512;
+        const y = Math.random() * 256;
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    return texture;
+  }, []);
+
+  // Create a simple clouds texture procedurally
+  const cloudsTexture = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, 512, 256);
+      
+      // Add cloud patterns
+      ctx.fillStyle = '#ffffff';
+      ctx.globalAlpha = 0.3;
+      for (let i = 0; i < 100; i++) {
+        const x = Math.random() * 512;
+        const y = Math.random() * 256;
+        const size = Math.random() * 20 + 5;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    return texture;
+  }, []);
+
+  // Configure all textures
+  useMemo(() => {
+    [earthTexture, nightTexture, cloudsTexture].forEach(texture => {
       texture.wrapS = THREE.RepeatWrapping;
       texture.wrapT = THREE.RepeatWrapping;
       texture.anisotropy = 16;
       texture.generateMipmaps = true;
     });
-  }, [dayTexture, nightTexture, cloudsTexture, normalTexture]);
+  }, [earthTexture, nightTexture, cloudsTexture]);
 
   // Earth material with shader
   const earthMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       uniforms: {
-        dayTexture: { value: dayTexture },
+        dayTexture: { value: earthTexture },
         nightTexture: { value: nightTexture },
         normalTexture: { value: normalTexture },
         sunDirection: { value: new THREE.Vector3(1, 0.5, 0.5) },
         time: { value: 0 },
         progress: { value: 0 },
         atmosphereColor: { value: new THREE.Color(0x87ceeb) }
-      },
       vertexShader: `
         varying vec2 vUv;
         varying vec3 vNormal;
@@ -110,7 +173,7 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
         }
       `
     });
-  }, [dayTexture, nightTexture, normalTexture]);
+  }, [earthTexture, nightTexture]);
 
   // Atmosphere material
   const atmosphereMaterial = useMemo(() => {
