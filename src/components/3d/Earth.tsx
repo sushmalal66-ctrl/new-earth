@@ -266,18 +266,24 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
     const time = state.clock.elapsedTime;
     const progress = earthProgress.get();
     
-    // Continuous rotation
-    meshRef.current.rotation.y = time * 0.1;
+    // Enhanced spinning - faster base rotation with progress-based acceleration
+    const baseSpeed = 0.3; // Increased from 0.1
+    const progressMultiplier = 1 + progress * 2; // Speed increases with progress
+    meshRef.current.rotation.y = time * baseSpeed * progressMultiplier;
     
-    // Clouds rotate slightly faster
+    // Clouds rotate even faster and in opposite direction for visual interest
     if (cloudsRef.current) {
-      cloudsRef.current.rotation.y = time * 0.12;
+      cloudsRef.current.rotation.y = -time * 0.4 * progressMultiplier;
     }
     
-    // Atmosphere counter-rotation
+    // Atmosphere spins slower but in same direction as Earth
     if (atmosphereRef.current) {
-      atmosphereRef.current.rotation.y = time * 0.08;
+      atmosphereRef.current.rotation.y = time * 0.25 * progressMultiplier;
     }
+    
+    // Add subtle rotation on other axes for more dynamic movement
+    groupRef.current.rotation.x = Math.sin(time * 0.1) * 0.05;
+    groupRef.current.rotation.z = Math.cos(time * 0.15) * 0.03;
     
     // Scale and position based on progress
     const scale = 1.0 + progress * 0.3;
