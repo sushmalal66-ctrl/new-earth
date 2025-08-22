@@ -1,12 +1,13 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { motion, useTransform, useMotionValue } from 'framer-motion';
+import { motion, useMotionValue } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ReactLenis, useLenis } from '@studio-freight/react-lenis';
 import ScrollEarth from './ScrollEarth';
 import HistoryContent from './HistoryContent';
 import CloudTransition from './CloudTransition';
+import { PerformanceMonitor } from '@react-three/drei';
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
@@ -17,11 +18,12 @@ const ScrollEarthSection: React.FC = () => {
   const earthRef = useRef<any>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isInCloudTransition, setIsInCloudTransition] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [performanceLevel, setPerformanceLevel] = useState<'high' | 'medium' | 'low'>('high');
 
   // Motion values for smooth animations
   const cloudOpacity = useMotionValue(0);
   const contentOpacity = useMotionValue(0);
+  const canvasOpacity = useMotionValue(1);
 
   // Single scroll handler using only Lenis
   const handleScroll = useCallback((scroll: number, limit: number) => {
@@ -48,6 +50,11 @@ const ScrollEarthSection: React.FC = () => {
       earthRef.current.updateScroll(progress);
     }
 
+    // Use motion value instead of direct DOM manipulation
+    const opacity = Math.max(0.7, 1 - progress * 0.3);
+    canvasOpacity.set(opacity);
+    }
+
     // Direct canvas transformations (no GSAP conflicts)
     // Keep canvas fixed and let Three.js handle positioning
     if (canvasRef.current) {
@@ -63,10 +70,16 @@ const ScrollEarthSection: React.FC = () => {
     handleScroll(scroll, limit);
   });
 
-  // Loading handler
+  // Performance monitoring and adaptive quality
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoaded(true), 100);
-    return () => clearTimeout(timer);
+    // Auto-adjust performance based on device capabilities
+    const canvas = document.querySelector('canvas');
+    if (canvas) {
+      const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+      if (!gl || navigator.hardwareConcurrency < 4) {
+        setPerformanceLevel('medium');
+      }
+    }
   }, []);
 
   return (
@@ -79,26 +92,37 @@ const ScrollEarthSection: React.FC = () => {
         {/* Fixed 3D Earth Canvas */}
         <div 
           ref={canvasRef}
-          className="fixed inset-0 z-10 pointer-events-none"
+          className="fixed inset-0 z-10 pointer-events-none canvas-container"
         >
-          <Canvas
-            camera={{ position: [0, 0, 5], fov: 45 }}
-            gl={{ 
-              antialias: true, 
-              alpha: true,
-              powerPreference: "high-performance", 
-              stencil: false,
-              depth: true,
-            }}
-            dpr={Math.min(window.devicePixelRatio, 2)}
-            performance={{ min: 0.8 }}
-          >
-            <ScrollEarth 
-              ref={earthRef}
-              scrollProgress={scrollProgress}
-              isInCloudTransition={isInCloudTransition}
-            />
-          </Canvas>
+          <motion.div style={{ opacity: canvasOpacity }}>
+            <Canvas
+              camera={{ position: [0, 0, 5], fov: 45 }}
+              gl={{ 
+                antialias: performanceLevel === 'high', 
+                alpha: true,
+                powerPreference: "high-performance", 
+                stencil: false,
+                depth: true,
+                logarithmicDepthBuffer: true, // Better depth precision
+              }}
+              dpr={performanceLevel === 'high' ? Math.min(window.devicePixelRatio, 2) : 1}
+              performance={{ min: 0.5, max: 1 }}
+              frameloop="demand" // Only render when needed
+            >
+              <PerformanceMonitor
+                onIncline={() => setPerformanceLevel('high')}
+                onDecline={() => setPerformanceLevel(prev => 
+                  prev === 'high' ? 'medium' : 'low'
+                )}
+              />
+              <ScrollEarth 
+                ref={earthRef}
+                scrollProgress={scrollProgress}
+                isInCloudTransition={isInCloudTransition}
+                performanceLevel={performanceLevel}
+              />
+            </Canvas>
+          </motion.div>
         </div>
 
         {/* Hero Content Overlay */}

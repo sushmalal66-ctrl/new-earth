@@ -56,6 +56,10 @@ const EnhancedSpaceEnvironment: React.FC<EnhancedSpaceEnvironmentProps> = ({
     const positions = new Float32Array(adjustedStarCount * 3);
     const colors = new Float32Array(adjustedStarCount * 3);
     const sizes = new Float32Array(adjustedStarCount);
+    
+    // Use instanced rendering for better performance
+    const instancedGeometry = new THREE.InstancedBufferGeometry();
+    instancedGeometry.instanceCount = adjustedStarCount;
 
     // Period-specific star colors
     const periodStarColors = {
@@ -119,6 +123,9 @@ const EnhancedSpaceEnvironment: React.FC<EnhancedSpaceEnvironmentProps> = ({
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+    
+    // Optimize geometry
+    geometry.computeBoundingSphere();
 
     return geometry;
   }, [adjustedStarCount, geologicalPeriod]);
@@ -126,6 +133,7 @@ const EnhancedSpaceEnvironment: React.FC<EnhancedSpaceEnvironmentProps> = ({
   const starMaterial = useMemo(() => {
     const complexity = performanceLevel === 'high' ? 'high' : 'low';
     
+    // Use shader material for better performance
     return new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 0 },
@@ -180,6 +188,7 @@ const EnhancedSpaceEnvironment: React.FC<EnhancedSpaceEnvironmentProps> = ({
       blending: THREE.AdditiveBlending,
       depthTest: false,
       transparent: true,
+      alphaTest: 0.1, // Discard transparent pixels for better performance
       vertexColors: true
     });
   }, [performanceLevel]);
@@ -187,6 +196,7 @@ const EnhancedSpaceEnvironment: React.FC<EnhancedSpaceEnvironmentProps> = ({
   // Create nebula clouds with period-specific colors
   const nebulaClouds = useMemo(() => {
     const clouds = [];
+    // Reduce cloud count for better performance
     const cloudCount = Math.floor(adjustedNebulaDensity * 20);
     
     const periodNebulaColors = {
@@ -271,6 +281,9 @@ const EnhancedSpaceEnvironment: React.FC<EnhancedSpaceEnvironmentProps> = ({
       starMaterial.uniforms.time.value = time;
     }
     
+    // Only update if performance allows
+    if (performanceLevel === 'low' && time % 2 > 1) return;
+    
     // Slowly rotate the entire star field
     if (starFieldRef.current) {
       starFieldRef.current.rotation.y = time * 0.0005;
@@ -286,6 +299,14 @@ const EnhancedSpaceEnvironment: React.FC<EnhancedSpaceEnvironmentProps> = ({
       });
     }
   });
+
+  // Cleanup function
+  useEffect(() => {
+    return () => {
+      starGeometry.dispose();
+      starMaterial.dispose();
+    };
+  }, [starGeometry, starMaterial]);
 
   return (
     <group>

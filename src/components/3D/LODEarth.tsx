@@ -9,7 +9,6 @@ interface LODEarthProps {
   performanceLevel?: 'high' | 'medium' | 'low';
   showAtmosphere?: boolean;
   showClouds?: boolean;
-  timeOfDay?: number;
   geologicalPeriod?: string;
 }
 
@@ -19,7 +18,6 @@ const LODEarth: React.FC<LODEarthProps> = ({
   performanceLevel = 'high',
   showAtmosphere = true,
   showClouds = true,
-  timeOfDay = 0.5,
   geologicalPeriod = 'cenozoic'
 }) => {
   const earthRef = useRef<THREE.Mesh>(null);
@@ -27,6 +25,10 @@ const LODEarth: React.FC<LODEarthProps> = ({
   const cloudsRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   const { camera } = useThree();
+  
+  // Geometry and material caching for better performance
+  const geometryCache = useRef<Map<string, THREE.BufferGeometry>>(new Map());
+  const materialCache = useRef<Map<string, THREE.Material>>(new Map());
 
   // Load textures based on performance level and geological period
   const textureUrls = useMemo(() => {
@@ -110,7 +112,6 @@ const LODEarth: React.FC<LODEarthProps> = ({
         nightTexture: { value: nightTexture },
         sunDirection: { value: new THREE.Vector3(1, 0, 0) },
         time: { value: 0 },
-        timeOfDay: { value: timeOfDay },
         atmosphereColor: { value: new THREE.Color(0x87ceeb) },
         periodIntensity: { value: geologicalPeriod === 'hadean' ? 2.0 : 1.0 }
       },
@@ -131,7 +132,6 @@ const LODEarth: React.FC<LODEarthProps> = ({
         uniform sampler2D nightTexture;
         uniform vec3 sunDirection;
         uniform float time;
-        uniform float timeOfDay;
         uniform vec3 atmosphereColor;
         uniform float periodIntensity;
         
@@ -188,7 +188,7 @@ const LODEarth: React.FC<LODEarthProps> = ({
         }
       `
     });
-  }, [dayTexture, nightTexture, timeOfDay, performanceLevel, geologicalPeriod]);
+  }, [dayTexture, nightTexture, performanceLevel, geologicalPeriod]);
 
   // Atmosphere material
   const atmosphereMaterial = useMemo(() => {
@@ -257,6 +257,21 @@ const LODEarth: React.FC<LODEarthProps> = ({
     }
   }, [performanceLevel]);
 
+  // Cached geometry creation
+  const getSphereGeometry = useCallback((key: string, args: [number, number, number]) => {
+    if (!geometryCache.current.has(key)) {
+      const geometry = new THREE.SphereGeometry(...args);
+      geometry.computeBoundingSphere();
+      geometryCache.current.set(key, geometry);
+    }
+    return geometryCache.current.get(key)!;
+  }, []);
+
+  // Get optimized geometries
+  const mainGeometry = getSphereGeometry('main', sphereArgs);
+  const atmosphereGeometry = getSphereGeometry('atmosphere', [1.02, Math.floor(sphereArgs[1] / 2), Math.floor(sphereArgs[2] / 2)]);
+  const cloudsGeometry = getSphereGeometry('clouds', [1.005, Math.floor(sphereArgs[1] / 2), Math.floor(sphereArgs[2] / 2)]);
+
   // Animation loop
   useFrame((state) => {
     if (!earthRef.current || !groupRef.current) return;
@@ -322,32 +337,34 @@ const LODEarth: React.FC<LODEarthProps> = ({
       />
 
       {/* Main Earth Sphere */}
-      <Sphere ref={earthRef} args={sphereArgs} castShadow receiveShadow>
+      <mesh ref={earthRef} geometry={mainGeometry} castShadow={performanceLevel === 'high'} receiveShadow={performanceLevel === 'high'}>
         <primitive object={earthMaterial} attach="material" />
-      </Sphere>
+      </mesh>
 
       {/* Cloud layer */}
       {cloudsMaterial && (
-        <Sphere ref={cloudsRef} args={[1.005, sphereArgs[1] / 2, sphereArgs[2] / 2]}>
+        <mesh ref={cloudsRef} geometry={cloudsGeometry}>
           <primitive object={cloudsMaterial} attach="material" />
-        </Sphere>
+        </mesh>
       )}
 
       {/* Atmosphere layers */}
       {atmosphereMaterial && (
         <>
-          <Sphere ref={atmosphereRef} args={[1.01, sphereArgs[1] / 2, sphereArgs[2] / 2]}>
+          <mesh ref={atmosphereRef} geometry={atmosphereGeometry}>
             <primitive object={atmosphereMaterial} attach="material" />
-          </Sphere>
+          </mesh>
           
-          <Sphere args={[1.03, 32, 16]}>
+          {performanceLevel === 'high' && (
+            <mesh geometry={getSphereGeometry('outerAtmosphere', [1.03, 32, 16])}>
             <meshBasicMaterial 
               color={atmosphereMaterial.uniforms.color.value}
               transparent
               opacity={0.03}
               side={THREE.BackSide}
             />
-          </Sphere>
+            </mesh>
+          )}
         </>
       )}
     </group>

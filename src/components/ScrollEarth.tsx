@@ -6,6 +6,7 @@ import * as THREE from 'three';
 interface ScrollEarthProps {
   scrollProgress: number;
   isInCloudTransition: boolean;
+  performanceLevel?: 'high' | 'medium' | 'low';
 }
 
 interface ScrollEarthRef {
@@ -14,7 +15,8 @@ interface ScrollEarthRef {
 
 const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({ 
   scrollProgress,
-  isInCloudTransition
+  isInCloudTransition,
+  performanceLevel = 'high'
 }, ref) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const atmosphereRef = useRef<THREE.Mesh>(null);
@@ -25,6 +27,10 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
   const scrollProgressRef = useRef(0);
   const lastUpdateTime = useRef(0);
   const rotationTime = useRef(0);
+  
+  // Memoized geometry to prevent recreation
+  const geometryCache = useRef<Map<string, THREE.BufferGeometry>>(new Map());
+  const materialCache = useRef<Map<string, THREE.Material>>(new Map());
   
   // Scroll following configuration
   const scrollConfig = {
@@ -64,6 +70,26 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
     }
   }, [earthTexture]);
 
+  // Optimized geometry creation with caching
+  const getOptimizedGeometry = useCallback((key: string, segments: [number, number, number]) => {
+    if (!geometryCache.current.has(key)) {
+      const geometry = new THREE.SphereGeometry(...segments);
+      // Optimize geometry
+      geometry.computeBoundingSphere();
+      geometry.computeBoundingBox();
+      geometryCache.current.set(key, geometry);
+    }
+    return geometryCache.current.get(key)!;
+  }, []);
+
+  // Cleanup geometry cache on unmount
+  useEffect(() => {
+    return () => {
+      geometryCache.current.forEach(geometry => geometry.dispose());
+      materialCache.current.forEach(material => material.dispose());
+    };
+  }, []);
+
   // Enhanced Earth material with scroll-responsive effects
   const earthMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
@@ -74,7 +100,8 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
         sunDirection: { value: new THREE.Vector3(1, 0.5, 0.5) },
         atmosphereColor: { value: new THREE.Color(0x94a3b8) },
         cloudTransition: { value: 0 },
-        cinematicTint: { value: new THREE.Color(0x64748b) }
+        cinematicTint: { value: new THREE.Color(0x64748b) },
+        performanceLevel: { value: performanceLevel === 'high' ? 1.0 : performanceLevel === 'medium' ? 0.5 : 0.0 }
       },
       vertexShader: `
         varying vec2 vUv;
@@ -83,6 +110,7 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
         varying vec3 vWorldPosition;
         uniform float time;
         uniform float scrollProgress;
+        uniform float performanceLevel;
         
         void main() {
           vUv = uv;
@@ -90,15 +118,19 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
           vPosition = position;
           vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
           
-          // Subtle vertex displacement for organic feel during scroll
+          // Conditional vertex displacement based on performance
+          if (performanceLevel > 0.5) {
+            // Only apply expensive vertex displacement on high performance
           vec3 pos = position;
           float displacement = sin(position.x * 8.0 + time * 0.5 + scrollProgress * 2.0) * 0.003 * scrollProgress;
           pos += normal * displacement;
-          
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+          } else {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
         }
       `,
-      fragmentShader: `
+      fragmentShader: performanceLevel === 'high' ? `
         uniform sampler2D earthTexture;
         uniform float time;
         uniform float scrollProgress;
@@ -139,9 +171,32 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
           
           gl_FragColor = vec4(color, 1.0);
         }
+      ` : `
+        // Simplified fragment shader for medium/low performance
+        uniform sampler2D earthTexture;
+        uniform float scrollProgress;
+        uniform vec3 sunDirection;
+        uniform vec3 cinematicTint;
+        
+        varying vec2 vUv;
+        varying vec3 vNormal;
+        
+        void main() {
+          vec3 earthColor = texture2D(earthTexture, vUv).rgb;
+          earthColor = mix(earthColor, earthColor * cinematicTint, 0.3);
+          
+          float sunDot = dot(vNormal, normalize(sunDirection));
+          float lighting = max(0.4, sunDot * 1.2);
+          
+          vec3 color = earthColor * lighting;
+          float enhancement = 1.0 + scrollProgress * 0.4;
+          color *= enhancement;
+          
+          gl_FragColor = vec4(color, 1.0);
+        }
       `
     });
-  }, [earthTexture]);
+  }, [earthTexture, performanceLevel]);
 
   // Atmosphere material with scroll-responsive glow
   const atmosphereMaterial = useMemo(() => {
@@ -252,8 +307,11 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
     const currentTime = state.clock.elapsedTime;
     const deltaTime = currentTime - lastUpdateTime.current;
     
-    // Target 60fps updates (16.67ms intervals)
-    if (deltaTime < 0.016) return;
+    // Adaptive frame rate based on performance level
+    const targetFrameTime = performanceLevel === 'high' ? 0.016 : 
+                           performanceLevel === 'medium' ? 0.033 : 0.066;
+    
+    if (deltaTime < targetFrameTime) return;
     lastUpdateTime.current = currentTime;
     
     const progress = scrollProgressRef.current;
@@ -316,6 +374,9 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
       glowMaterial.uniforms.time.value = currentTime;
       glowMaterial.uniforms.scrollProgress.value = progress;
     }
+    
+    // Invalidate frame to trigger re-render only when needed
+    state.invalidate();
   });
 
   // Expose scroll update method to parent component
@@ -325,6 +386,11 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
       scrollProgressRef.current = Math.max(0, Math.min(1, progress));
     }
   }));
+
+  // Get cached geometries
+  const mainSphereGeometry = getOptimizedGeometry('main', sphereArgs);
+  const atmosphereGeometry = getOptimizedGeometry('atmosphere', [1.02, Math.floor(sphereArgs[1] / 2), Math.floor(sphereArgs[2] / 2)]);
+  const glowGeometry = getOptimizedGeometry('glow', [1.08, Math.floor(sphereArgs[1] / 4), Math.floor(sphereArgs[2] / 4)]);
 
   return (
     <group ref={groupRef}>
@@ -363,38 +429,42 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
       />
 
       {/* Main Earth Sphere */}
-      <Sphere ref={meshRef} args={[1, 128, 64]} castShadow receiveShadow>
+      <mesh ref={meshRef} geometry={mainSphereGeometry} castShadow={performanceLevel === 'high'} receiveShadow={performanceLevel === 'high'}>
         <primitive object={earthMaterial} attach="material" />
-      </Sphere>
+      </mesh>
 
       {/* Atmosphere Layer */}
-      <Sphere ref={atmosphereRef} args={[1.02, 64, 32]}>
+      <mesh ref={atmosphereRef} geometry={atmosphereGeometry}>
         <primitive object={atmosphereMaterial} attach="material" />
-      </Sphere>
+      </mesh>
 
       {/* Outer Glow Effect */}
-      <Sphere ref={glowRef} args={[1.08, 32, 16]}>
+      <mesh ref={glowRef} geometry={glowGeometry}>
         <primitive object={glowMaterial} attach="material" />
-      </Sphere>
+      </mesh>
 
       {/* Additional subtle glow layers for depth */}
-      <Sphere args={[1.15, 16, 8]}>
+      {performanceLevel === 'high' && (
+        <>
+          <mesh geometry={getOptimizedGeometry('glow1', [1.15, 16, 8])}>
         <meshBasicMaterial 
           color="#64748b"
           transparent
           opacity={0.025}
           side={THREE.BackSide}
         />
-      </Sphere>
+          </mesh>
       
-      <Sphere args={[1.25, 12, 6]}>
+          <mesh geometry={getOptimizedGeometry('glow2', [1.25, 12, 6])}>
         <meshBasicMaterial 
           color="#94a3b8"
           transparent
           opacity={0.015}
           side={THREE.BackSide}
         />
-      </Sphere>
+          </mesh>
+        </>
+      )}
     </group>
   );
 });

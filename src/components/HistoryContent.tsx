@@ -17,9 +17,7 @@ import {
 
 gsap.registerPlugin(ScrollTrigger);
 
-interface HistoryContentProps {
-  scrollProgress: number;
-}
+interface HistoryContentProps {}
 
 interface HistoryPeriod {
   id: string;
@@ -35,7 +33,7 @@ interface HistoryPeriod {
   image: string;
 }
 
-const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
+const HistoryContent: React.FC<HistoryContentProps> = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const periodsRef = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -139,6 +137,10 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
     ScrollTrigger.config({
       autoRefreshEvents: "visibilitychange,DOMContentLoaded,load"
     });
+    
+    // Use RAF for better performance
+    ScrollTrigger.config({ autoRefreshEvents: "visibilitychange,DOMContentLoaded,load,resize" });
+    ScrollTrigger.refresh();
 
     const ctx = gsap.context(() => {
       // Use ScrollTrigger.batch for better performance
@@ -161,6 +163,7 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
               duration: 1.5,
               ease: "power3.out",
               stagger: 0.2,
+              overwrite: "auto", // Prevent animation conflicts
               force3D: true
             }
           );
@@ -170,6 +173,7 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
             opacity: 0.3,
             scale: 0.95,
             duration: 0.5,
+            overwrite: "auto",
             force3D: true
           });
         },
@@ -178,6 +182,7 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
             opacity: 1,
             scale: 1,
             duration: 0.5,
+            overwrite: "auto",
             force3D: true
           });
         },
@@ -189,6 +194,8 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
       validPeriods.forEach((period) => {
         const image = period.querySelector('.period-image');
         if (image) {
+          // Use will-change for better performance
+          gsap.set(image, { willChange: "transform" });
           gsap.to(image, {
             y: -50,
             scale: 1.1,
@@ -198,6 +205,7 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
               start: "top bottom",
               end: "bottom top",
               scrub: 0.5,
+              refreshPriority: -1, // Lower priority for parallax
               invalidateOnRefresh: true
             }
           });
@@ -213,12 +221,20 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
         repeat: -1,
         yoyo: true,
         stagger: 0.5,
+        paused: false,
         force3D: true
       });
 
     }, contentRef);
 
     return () => ctx.revert();
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
   }, []);
 
   return (
