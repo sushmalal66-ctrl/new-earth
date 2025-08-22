@@ -354,42 +354,51 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
     const time = state.clock.elapsedTime;
     const progress = earthProgress.get();
     
-    // CONTINUOUS SPINNING - Always rotating regardless of scroll
-    const baseSpeed = 0.4; // Steady rotation speed
-    const progressMultiplier = 1 + progress * 1.5; // Moderate speed increase with scroll
+    // CONTINUOUS SPINNING ON Y-AXIS (Earth's rotation)
+    const baseRotationSpeed = 0.3; // Steady rotation speed around Y-axis
+    const scrollSpeedMultiplier = 1 + progress * 0.5; // Slight speed increase with scroll
     
-    // Main Earth spinning - ALWAYS rotating
-    meshRef.current.rotation.y = time * baseSpeed * progressMultiplier;
-    meshRef.current.rotation.x = Math.sin(time * 0.1) * 0.05; // Subtle wobble
+    // Main Earth spinning on Y-axis (like real Earth rotation)
+    meshRef.current.rotation.y = time * baseRotationSpeed * scrollSpeedMultiplier;
+    
+    // Very subtle wobble for realism (Earth's axial tilt variation)
+    meshRef.current.rotation.x = Math.sin(time * 0.08) * 0.02;
+    meshRef.current.rotation.z = Math.cos(time * 0.12) * 0.01;
     
     // Clouds rotate independently for dynamic layering
     if (cloudsRef.current) {
-      cloudsRef.current.rotation.y = time * 0.6 * progressMultiplier; // Same direction, different speed
-      cloudsRef.current.rotation.z = Math.sin(time * 0.2) * 0.03;
+      cloudsRef.current.rotation.y = time * 0.4 * scrollSpeedMultiplier; // Clouds move slightly faster
+      cloudsRef.current.rotation.z = Math.sin(time * 0.15) * 0.02;
     }
     
     // Atmosphere rotates with subtle variations
     if (atmosphereRef.current) {
-      atmosphereRef.current.rotation.y = time * 0.3 * progressMultiplier;
-      atmosphereRef.current.rotation.x = Math.cos(time * 0.15) * 0.02;
+      atmosphereRef.current.rotation.y = time * 0.25 * scrollSpeedMultiplier;
+      atmosphereRef.current.rotation.x = Math.cos(time * 0.1) * 0.015;
     }
     
-    // Subtle orbital movement for the entire group
-    groupRef.current.rotation.x = Math.sin(time * 0.1) * 0.03;
-    groupRef.current.rotation.z = Math.cos(time * 0.12) * 0.02;
+    // SCROLL-BASED FORWARD MOVEMENT
+    // Move Earth forward (towards camera) as user scrolls
+    const baseZ = 0; // Starting Z position
+    const maxForwardMovement = 1.5; // Maximum forward movement
+    const forwardProgress = Math.min(1, progress * 1.2); // Slightly faster than scroll
+    groupRef.current.position.z = baseZ + (forwardProgress * maxForwardMovement);
     
-    // Gentle scaling and floating animation
-    const scale = 1.0 + progress * 0.2;
-    const pulse = Math.sin(time * 1.5) * 0.01 + 1;
-    groupRef.current.scale.setScalar(scale * pulse);
+    // Subtle floating motion (reduced when moved forward)
+    const floatIntensity = 1 - forwardProgress * 0.5; // Reduce floating as it moves forward
+    groupRef.current.position.y = Math.sin(time * 0.3) * 0.03 * floatIntensity;
+    groupRef.current.position.x = Math.sin(time * 0.25) * 0.02 * floatIntensity;
     
-    // Gentle floating motion
-    groupRef.current.position.y = Math.sin(time * 0.3) * 0.05 + Math.cos(time * 0.4) * 0.02;
-    groupRef.current.position.x = Math.sin(time * 0.25) * 0.02;
+    // Gentle scaling with scroll (Earth appears larger as it comes forward)
+    const baseScale = 1.0;
+    const scaleIncrease = progress * 0.3; // Moderate scale increase
+    const pulse = Math.sin(time * 1.2) * 0.008 + 1; // Subtle pulse
+    groupRef.current.scale.setScalar((baseScale + scaleIncrease) * pulse);
     
-    // Subtle camera movement for cinematic effect
-    const cameraDistance = 5 - progress * 1;
-    state.camera.position.z = cameraDistance + Math.sin(time * 0.08) * 0.1;
+    // Adjust camera slightly for better viewing as Earth moves forward
+    const baseCameraZ = 5;
+    const cameraAdjustment = progress * 0.5; // Slight camera pullback
+    state.camera.position.z = baseCameraZ + cameraAdjustment + Math.sin(time * 0.06) * 0.05;
     
     // Update shader uniforms
     earthMaterial.uniforms.time.value = time;
@@ -403,31 +412,33 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
     cloudsMaterial.uniforms.time.value = time;
     cloudsMaterial.uniforms.progress.value = progress;
     
-    // Dynamic sun direction with more movement
-    const sunAngle = progress * Math.PI + time * 0.05;
+    // Dynamic sun direction (simulates day/night cycle)
+    const sunAngle = progress * Math.PI * 2 + time * 0.03;
     earthMaterial.uniforms.sunDirection.value.set(
       Math.cos(sunAngle),
-      Math.sin(sunAngle * 0.7) * 0.8,
-      Math.sin(sunAngle) * 0.6
+      Math.sin(sunAngle * 0.5) * 0.6,
+      Math.sin(sunAngle) * 0.4
     );
   });
 
-  // Enhanced hover effects for desktop
+  // Enhanced hover effects for desktop (reduced when Earth is forward)
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
       if (!groupRef.current || window.innerWidth < 768) return;
       
       const x = (event.clientX / window.innerWidth) * 2 - 1;
       const y = -(event.clientY / window.innerHeight) * 2 + 1;
+      const progress = earthProgress.get();
+      const hoverIntensity = 1 - progress * 0.7; // Reduce hover effect when forward
       
-      // More responsive mouse interaction
-      groupRef.current.rotation.x += y * 0.05;
-      groupRef.current.rotation.z += x * 0.05;
+      // Responsive mouse interaction (reduced when Earth is forward)
+      groupRef.current.rotation.x += y * 0.03 * hoverIntensity;
+      groupRef.current.rotation.z += x * 0.03 * hoverIntensity;
     };
 
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+  }, [earthProgress]);
 
   return (
     <group ref={groupRef}>
