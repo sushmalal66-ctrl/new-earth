@@ -4,6 +4,10 @@ import { motion } from 'framer-motion';
 import Scene from '../components/3d/Scene';
 import HorizontalTimeline from '../components/HorizontalTimeline';
 import { useLenisGsapSync } from '../hooks/useLenisGsapSync';
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const Home: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
