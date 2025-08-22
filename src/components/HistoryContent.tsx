@@ -281,12 +281,12 @@ const historyPeriods: HistoryPeriod[] = [
   useEffect(() => {
     if (!contentRef.current) return;
 
-    // Debounce ScrollTrigger setup
     const setupScrollTrigger = () => {
       // Optimize ScrollTrigger performance
       ScrollTrigger.config({
         autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
-        limitCallbacks: true
+        limitCallbacks: true,
+        ignoreMobileResize: true
       });
 
       const ctx = gsap.context(() => {
@@ -335,7 +335,7 @@ const historyPeriods: HistoryPeriod[] = [
           },
           start: "top 80%",
           end: "top 20%",
-          refreshPriority: -1
+          refreshPriority: -2
         });
 
         // Simplified parallax for images (only on high performance)
@@ -352,7 +352,7 @@ const historyPeriods: HistoryPeriod[] = [
                   start: "top bottom",
                   end: "bottom top",
                   scrub: 1,
-                  refreshPriority: -2,
+                  refreshPriority: -3,
                   invalidateOnRefresh: true
                 }
               });
@@ -377,11 +377,11 @@ const historyPeriods: HistoryPeriod[] = [
       return () => ctx.revert();
     };
     
-    // Delay setup to avoid blocking scroll
-    const timeoutId = setTimeout(setupScrollTrigger, 100);
+    // Use GSAP's delayedCall for better timing
+    const delayedSetup = gsap.delayedCall(0.1, setupScrollTrigger);
     
     return () => {
-      clearTimeout(timeoutId);
+      delayedSetup.kill();
     };
   }, []);
 

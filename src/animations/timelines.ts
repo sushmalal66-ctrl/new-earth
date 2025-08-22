@@ -4,8 +4,12 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 export const initializeTimelines = (container: HTMLElement) => {
-  // Clear existing ScrollTriggers
-  ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+  // Clear existing ScrollTriggers for this container only
+  ScrollTrigger.getAll().forEach(trigger => {
+    if (trigger.vars.trigger && container.contains(trigger.vars.trigger as Element)) {
+      trigger.kill();
+    }
+  });
 
   // Section-based animations
   const sections = container.querySelectorAll('[data-section]');
@@ -26,6 +30,7 @@ export const initializeTimelines = (container: HTMLElement) => {
       start: "top 80%",
       end: "top 20%",
       toggleActions: "play none none reverse",
+      refreshPriority: -1,
       onEnter: () => {
         gsap.to(sectionElement, {
           opacity: 1,
@@ -64,6 +69,7 @@ export const initializeTimelines = (container: HTMLElement) => {
         trigger: text,
         start: "top 85%",
         toggleActions: "play none none reverse",
+        refreshPriority: -1,
         onEnter: () => {
           gsap.fromTo(text, 
             { 
@@ -90,6 +96,7 @@ export const initializeTimelines = (container: HTMLElement) => {
     start: "top top",
     end: "bottom bottom",
     scrub: true,
+    refreshPriority: 1,
     onUpdate: (self) => {
       const progress = self.progress;
       
@@ -103,10 +110,10 @@ export const initializeTimelines = (container: HTMLElement) => {
     }
   });
 
-  // Refresh ScrollTrigger after setup
-  setTimeout(() => {
+  // Refresh ScrollTrigger after setup with proper timing
+  gsap.delayedCall(0.1, () => {
     ScrollTrigger.refresh();
-  }, 100);
+  });
 };
 
 // Utility function to create smooth scroll-to animations

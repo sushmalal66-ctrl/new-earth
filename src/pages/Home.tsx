@@ -12,9 +12,21 @@ const Home: React.FC = () => {
 
   // Handle timeline progress changes
   const handleTimelineProgressChange = (progress: number) => {
-    // Additional logic for timeline progress changes can be added here
-    console.log('Timeline progress:', progress);
+    // Sync timeline progress with earth rotation
+    if (earthProgress) {
+      earthProgress.set(progress);
+    }
   };
+
+  // Ensure proper initialization order
+  useEffect(() => {
+    // Small delay to ensure DOM is ready
+    const initTimeout = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 200);
+
+    return () => clearTimeout(initTimeout);
+  }, []);
 
   return (
     <div ref={containerRef} className="relative bg-black text-white overflow-x-hidden">

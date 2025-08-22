@@ -12,10 +12,9 @@ export const useLenisGsapSync = () => {
   const scrollProgress = useMotionValue(0);
   const earthProgress = useMotionValue(0);
   const timelineProgress = useMotionValue(0);
-  const rafId = useRef<number>();
 
   useEffect(() => {
-    // Initialize Lenis with optimized settings
+    // Initialize Lenis with optimized settings for GSAP integration
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -28,8 +27,7 @@ export const useLenisGsapSync = () => {
       infinite: false,
       autoResize: true,
       normalizeWheel: true,
-      syncTouch: true,
-      // Enhanced settings for horizontal scroll compatibility
+      syncTouch: false, // Changed to false for better performance
       lerp: 0.1,
       wheelMultiplier: 1,
       touchInertiaMultiplier: 35
@@ -42,7 +40,7 @@ export const useLenisGsapSync = () => {
       scrollTop(value) {
         return arguments.length 
           ? lenis.scrollTo(value, { immediate: true })
-          : window.scrollY;
+          : lenis.scroll;
       },
       getBoundingClientRect() {
         return {
@@ -55,28 +53,26 @@ export const useLenisGsapSync = () => {
       pinType: document.body.style.transform ? 'transform' : 'fixed'
     });
 
-    // Set ScrollTrigger defaults with enhanced settings for horizontal scroll
+    // Set ScrollTrigger defaults
     ScrollTrigger.defaults({ 
-      scroller: document.body,
-      refreshPriority: 0,
-      anticipatePin: 1
+      scroller: document.body
     });
 
-    // Configure ScrollTrigger for better performance with horizontal scrolling
+    // Configure ScrollTrigger for better performance
     ScrollTrigger.config({
-      autoRefreshEvents: "visibilitychange,DOMContentLoaded,load,resize",
+      autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
       limitCallbacks: true,
       ignoreMobileResize: true
     });
 
-    // Sync Lenis with GSAP ticker for perfect synchronization
-    const raf = (time: number) => {
-      lenis.raf(time);
-      rafId.current = requestAnimationFrame(raf);
+    // CRITICAL: Use GSAP ticker instead of requestAnimationFrame
+    const update = (time: number) => {
+      lenis.raf(time * 1000); // Convert to milliseconds
     };
-    rafId.current = requestAnimationFrame(raf);
 
-    // Update ScrollTrigger on Lenis scroll
+    gsap.ticker.add(update);
+
+    // Update ScrollTrigger and motion values on Lenis scroll
     lenis.on('scroll', ({ scroll, limit, velocity, direction, progress }) => {
       ScrollTrigger.update();
       
@@ -106,16 +102,15 @@ export const useLenisGsapSync = () => {
       lenis.resize();
     });
     
-    // Delayed refresh to ensure proper initialization
-    setTimeout(() => {
+    // Initial refresh with proper timing
+    const refreshTimeout = setTimeout(() => {
       ScrollTrigger.refresh();
     }, 100);
 
     // Cleanup function
     return () => {
-      if (rafId.current) {
-        cancelAnimationFrame(rafId.current);
-      }
+      clearTimeout(refreshTimeout);
+      gsap.ticker.remove(update);
       lenis.off('scroll');
       lenis.destroy();
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());

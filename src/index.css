@@ -20,7 +20,7 @@
 }
 
 html {
-  scroll-behavior: auto; /* Let Lenis handle smooth scrolling */
+  scroll-behavior: auto !important; /* Let Lenis handle smooth scrolling */
   overflow-x: hidden;
 }
 
@@ -34,6 +34,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   background: linear-gradient(135deg, #000000 0%, #111827 50%, #1f2937 100%);
+  /* Ensure no conflicting scroll behavior */
+  scroll-behavior: auto !important;
 }
 
 /* Performance optimizations */

@@ -176,40 +176,52 @@ const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
     // Calculate total scroll distance for horizontal movement
     const totalWidth = timeline.scrollWidth - window.innerWidth;
     
+    // Kill existing ScrollTriggers for this container
+    ScrollTrigger.getAll().forEach(trigger => {
+      if (trigger.vars.trigger === container) {
+        trigger.kill();
+      }
+    });
+    
     // Create horizontal scroll animation
-    const horizontalScroll = gsap.to(timeline, {
+    const horizontalScroll = gsap.timeline();
+    horizontalScroll.to(timeline, {
       x: -totalWidth,
       ease: "none",
-      scrollTrigger: {
-        trigger: container,
-        start: "top top",
-        end: () => `+=${totalWidth}`,
-        scrub: 1,
-        pin: true,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          const progress = self.progress;
+      duration: 1
+    });
+
+    // Create ScrollTrigger separately for better control
+    ScrollTrigger.create({
+      trigger: container,
+      start: "top top",
+      end: () => `+=${totalWidth}`,
+      scrub: 1,
+      pin: true,
+      anticipatePin: 1,
+      invalidateOnRefresh: true,
+      animation: horizontalScroll,
+      onUpdate: (self) => {
+        const progress = self.progress;
+        
+        // Update Earth rotation based on scroll progress
+        earthProgress.set(progress);
+        onProgressChange(progress);
+        
+        // Determine active era based on scroll progress
+        const newActiveEra = Math.floor(progress * (timelineEras.length - 1));
+        if (newActiveEra !== activeEra) {
+          setActiveEra(newActiveEra);
           
-          // Update Earth rotation based on scroll progress
-          earthProgress.set(progress);
-          onProgressChange(progress);
-          
-          // Determine active era based on scroll progress
-          const newActiveEra = Math.floor(progress * (timelineEras.length - 1));
-          if (newActiveEra !== activeEra) {
-            setActiveEra(newActiveEra);
-            
-            // Trigger typing animation for new era
-            setShowTyping(prev => ({
-              ...prev,
-              [newActiveEra]: true
-            }));
-          }
-          
-          // Update CSS custom property for other animations
-          document.documentElement.style.setProperty('--timeline-progress', progress.toString());
+          // Trigger typing animation for new era
+          setShowTyping(prev => ({
+            ...prev,
+            [newActiveEra]: true
+          }));
         }
+        
+        // Update CSS custom property for other animations
+        document.documentElement.style.setProperty('--timeline-progress', progress.toString());
       }
     });
 
@@ -237,7 +249,8 @@ const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
             end: "left 20%",
             horizontal: true,
             toggleActions: "play none none reverse",
-            containerAnimation: horizontalScroll
+            containerAnimation: horizontalScroll,
+            refreshPriority: -1
           }
         }
       );
@@ -254,16 +267,20 @@ const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
             end: "right left",
             scrub: 1,
             horizontal: true,
-            containerAnimation: horizontalScroll
+            containerAnimation: horizontalScroll,
+            refreshPriority: -1
           }
         });
       }
     });
 
+    // Refresh ScrollTrigger after setup
+    ScrollTrigger.refresh();
+
     // Cleanup function
     return () => {
       ScrollTrigger.getAll().forEach(trigger => {
-        if (trigger.vars.trigger === container) {
+        if (trigger.vars.trigger === container || trigger.vars.containerAnimation === horizontalScroll) {
           trigger.kill();
         }
       });
