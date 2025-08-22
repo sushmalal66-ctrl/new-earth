@@ -119,7 +119,6 @@ const Home: React.FC = () => {
         {/* Horizontal Timeline */}
         <HorizontalTimeline 
           earthProgress={earthProgress}
-          onProgressChange={handleTimelineProgressChange}
         />
         
         {/* Conclusion Section */}
