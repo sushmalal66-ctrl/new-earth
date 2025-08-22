@@ -568,6 +568,12 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
                         alt={period.title}
                          loading="lazy" 
                         className="period-image w-full h-80 md:h-96 object-cover group-hover:scale-110 transition-transform duration-700"
+                        onError={(e) => {
+                          // Fallback if image fails to load
+                          const target = e.target as HTMLImageElement;
+                          target.src = `https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=800&h=600&fit=crop&auto=format`;
+                          target.onerror = null; // Prevent infinite loop
+                        }}
                       />
                       
                       {/* Image Overlay */}
