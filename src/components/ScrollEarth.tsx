@@ -6,8 +6,7 @@ import * as THREE from 'three';
 
 interface ScrollEarthProps {
   scrollProgress: number;
-  isInCloudTransition: boolean;
-  opacity: MotionValue<number>;
+  isInCloudTransition: boolean; // Keep this for shader uniform
 }
 
 interface ScrollEarthRef {
@@ -15,9 +14,8 @@ interface ScrollEarthRef {
 }
 
 const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({ 
-  scrollProgress, 
-  isInCloudTransition,
-  opacity
+  scrollProgress,
+  isInCloudTransition
 }, ref) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const atmosphereRef = useRef<THREE.Mesh>(null);

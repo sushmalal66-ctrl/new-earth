@@ -26,10 +26,6 @@ const ScrollEarthSection: React.FC = () => {
     offset: ["start start", "end end"]
   });
 
-  // Optimized scroll transforms with proper bounds
-  const earthScale = useTransform(scrollYProgress, [0, 0.2, 0.5, 0.8, 1], [1, 1.5, 2.5, 4, 5]);
-  const earthY = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, -50, -150, -250]);
-  const earthOpacity = useTransform(scrollYProgress, [0, 0.1, 0.85, 1], [1, 1, 0.8, 0.3]);
   const cloudOpacity = useTransform(scrollYProgress, [0.3, 0.5, 0.7, 0.9], [0, 0.3, 0.8, 1]);
   const contentOpacity = useTransform(scrollYProgress, [0, 0.15, 0.85, 1], [0, 1, 1, 0]);
 
@@ -196,24 +192,6 @@ const ScrollEarthSection: React.FC = () => {
     };
   }, [isLoaded, handleScrollProgress]);
 
-  // Optimized scroll progress updates with debouncing
-  useEffect(() => {
-    let ticking = false;
-    
-    const updateProgress = (latest: number) => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          setScrollProgress(latest);
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    const unsubscribe = scrollYProgress.on('change', updateProgress);
-    return () => unsubscribe();
-  }, [scrollYProgress]);
-
   // Loading handler
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 100);
@@ -252,8 +230,6 @@ const ScrollEarthSection: React.FC = () => {
             <ScrollEarth 
               ref={earthRef}
               scrollProgress={scrollProgress}
-              isInCloudTransition={isInCloudTransition}
-              opacity={earthOpacity}
             />
           </Canvas>
         </div>
