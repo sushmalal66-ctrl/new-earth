@@ -72,13 +72,6 @@ export const useLenisGsapSync = () => {
       earthProgress.set(earthProgressValue);
     });
 
-    // Listen for timeline progress events for Earth rotation sync
-    const handleTimelineProgress = (event: CustomEvent) => {
-      const { progress } = event.detail;
-      earthProgress.set(progress);
-    };
-
-    window.addEventListener('timeline-progress', handleTimelineProgress as EventListener);
     // Refresh ScrollTrigger after Lenis is ready
     ScrollTrigger.addEventListener('refresh', () => lenis.resize());
     ScrollTrigger.refresh();
@@ -88,7 +81,6 @@ export const useLenisGsapSync = () => {
       if (rafId.current) {
         cancelAnimationFrame(rafId.current);
       }
-      window.removeEventListener('timeline-progress', handleTimelineProgress as EventListener);
       lenis.destroy();
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
