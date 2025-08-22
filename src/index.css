@@ -4,15 +4,14 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-/* Custom CSS Variables */
+/* CSS Variables for dynamic theming */
 :root {
-  --primary-black: #000000;
-  --primary-white: #ffffff;
-  --blue-white: #f0f8ff;
-  --earth-blue: #4169e1;
-  --space-black: #0a0a0a;
+  --scroll-progress: 0;
+  --earth-rotation: 0deg;
+  --particle-density: 1;
 }
 
+/* Base styles */
 * {
   margin: 0;
   padding: 0;
@@ -20,18 +19,30 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto; /* Let Lenis handle smooth scrolling */
   overflow-x: hidden;
 }
 
 body {
-  font-family: 'Inter', sans-serif;
-  background-color: var(--space-black);
-  color: var(--primary-white);
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #000000;
+  color: #ffffff;
   overflow-x: hidden;
-  line-height: 1.5;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Performance optimizations */
+* {
+  will-change: auto;
+}
+
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 /* Custom scrollbar */
@@ -40,53 +51,50 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.8), rgba(65, 105, 225, 0.6));
-  border-radius: 4px;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: linear-gradient(180deg, rgba(0, 255, 255, 0.6), rgba(65, 105, 225, 0.4));
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgba(59, 130, 246, 1.0), rgba(65, 105, 225, 0.8));
+  background: linear-gradient(180deg, rgba(0, 255, 255, 0.8), rgba(65, 105, 225, 0.6));
 }
 
-/* Custom utilities */
+/* Utility classes */
 @layer utilities {
   .text-shadow-glow {
     text-shadow: 
-      0 0 10px rgba(59, 130, 246, 0.3),
-      0 0 20px rgba(59, 130, 246, 0.2),
-      0 0 40px rgba(59, 130, 246, 0.1);
+      0 0 10px rgba(0, 255, 255, 0.5),
+      0 0 20px rgba(0, 255, 255, 0.3),
+      0 0 40px rgba(0, 255, 255, 0.1);
   }
   
   .backdrop-blur-strong {
     backdrop-filter: blur(24px) saturate(180%);
   }
   
-  .gradient-border {
-    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.6), transparent);
-    height: 1px;
-  }
-  
   .glass-effect {
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(16px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
   
+  .neon-border {
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    box-shadow: 
+      0 0 10px rgba(0, 255, 255, 0.2),
+      inset 0 0 10px rgba(0, 255, 255, 0.1);
+  }
+  
   .text-glow {
-    text-shadow: 0 0 30px currentColor;
+    text-shadow: 0 0 20px currentColor;
   }
   
   .bg-gradient-radial {
     background: radial-gradient(circle, var(--tw-gradient-stops));
-  }
-  
-  .scroll-smooth {
-    scroll-behavior: smooth;
   }
   
   .perspective-1000 {
@@ -96,6 +104,10 @@ body {
   .transform-gpu {
     transform: translateZ(0);
     will-change: transform;
+  }
+  
+  .scroll-smooth {
+    scroll-behavior: smooth;
   }
 }
 
@@ -120,173 +132,175 @@ body {
 @keyframes glowPulse {
   0%, 100% {
     box-shadow: 
-      0 0 20px rgba(59, 130, 246, 0.3),
-      0 0 40px rgba(59, 130, 246, 0.1);
+      0 0 20px rgba(0, 255, 255, 0.3),
+      0 0 40px rgba(0, 255, 255, 0.1);
   }
   50% {
     box-shadow: 
-      0 0 40px rgba(59, 130, 246, 0.6),
-      0 0 80px rgba(59, 130, 246, 0.2);
+      0 0 40px rgba(0, 255, 255, 0.6),
+      0 0 80px rgba(0, 255, 255, 0.2);
   }
 }
 
-/* Enhanced button animations */
+/* Particle animations */
+.particle-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Enhanced button styles */
 .btn-3d {
   transform-style: preserve-3d;
-  transition: transform 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .btn-3d:hover {
-  transform: translateY(-2px) rotateX(5deg);
+  transform: translateY(-4px) rotateX(10deg);
+  box-shadow: 
+    0 10px 30px rgba(0, 255, 255, 0.3),
+    0 0 20px rgba(0, 255, 255, 0.2);
 }
 
 .btn-3d:active {
-  transform: translateY(0px) rotateX(0deg);
+  transform: translateY(-2px) rotateX(5deg);
 }
 
-/* Performance optimizations */
-.gpu-accelerated {
-  transform: translateZ(0);
-  will-change: transform;
-  backface-visibility: hidden;
-  perspective: 1000px;
-}
-
-/* Enhanced performance classes */
-.transform-gpu {
-  transform: translateZ(0);
-  will-change: transform;
-  backface-visibility: hidden;
-}
-
-.scroll-optimized {
-  contain: layout style paint;
-  content-visibility: auto;
-}
-
-.animation-optimized {
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-  transform: translateZ(0);
-}
-
-/* Enhanced focus styles for better accessibility */
-button:focus-visible,
-input:focus-visible,
-select:focus-visible {
-  outline: 2px solid rgba(59, 130, 246, 0.8);
-  outline-offset: 2px;
-  border-radius: 6px;
-}
-
-/* Canvas optimization */
+/* Canvas optimizations */
 canvas {
   display: block;
   outline: none;
-  image-rendering: auto;
   touch-action: none;
-  /* GPU acceleration for smooth transforms */
+  image-rendering: auto;
+  /* GPU acceleration */
   transform: translateZ(0);
   will-change: transform;
   backface-visibility: hidden;
 }
 
-/* Optimized canvas container */
-.canvas-container {
-  will-change: transform, opacity;
-  transform: translateZ(0);
-  backface-visibility: hidden;
+/* Section transitions */
+section {
   contain: layout style paint;
+  will-change: transform, opacity;
 }
 
-/* Prevent text selection on UI elements */
-.no-select {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+/* Performance optimizations for mobile */
+@media (max-width: 768px) {
+  .particle-field {
+    display: none; /* Hide complex particles on mobile */
+  }
+  
+  canvas {
+    image-rendering: optimizeSpeed;
+  }
+  
+  .backdrop-blur-strong {
+    backdrop-filter: blur(8px); /* Reduce blur complexity */
+  }
 }
 
-/* Smooth transitions for all elements */
-* {
-  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 200ms;
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .glass-effect {
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid rgba(0, 255, 255, 0.8);
+  }
 }
 
-/* Remove transitions for reduced motion users */
+/* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-}
-
-/* Responsive typography */
-@media (max-width: 768px) {
-  .text-responsive-xl {
-    font-size: 2.5rem;
-    line-height: 1.2;
-  }
   
-  .text-responsive-2xl {
-    font-size: 3rem;
-    line-height: 1.1;
+  .float-animation,
+  .glow-pulse,
+  .particle-twinkle {
+    animation: none;
   }
 }
 
-@media (min-width: 769px) {
-  .text-responsive-xl {
-    font-size: 4rem;
-    line-height: 1.2;
-  }
-  
-  .text-responsive-2xl {
-    font-size: 5rem;
-    line-height: 1.1;
+/* Focus styles for accessibility */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid rgba(0, 255, 255, 0.8);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Loading states */
+.loading-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Typography enhancements */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+p {
+  line-height: 1.7;
+}
+
+/* Smooth transitions for all interactive elements */
+button, a, input, select {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Grid system enhancements */
+.grid-auto-fit {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.grid-auto-fill {
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+/* Aspect ratio utilities */
+.aspect-golden {
+  aspect-ratio: 1.618 / 1;
+}
+
+.aspect-video {
+  aspect-ratio: 16 / 9;
+}
+
+.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+
+/* Container queries support */
+@container (min-width: 768px) {
+  .container-md\:text-lg {
+    font-size: 1.125rem;
   }
 }
 
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .bg-black\/60 {
-    background-color: rgba(0, 0, 0, 0.9);
+/* Print styles */
+@media print {
+  * {
+    background: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
   }
-  
-  .border-blue-500\/20 {
-    border-color: rgba(59, 130, 246, 0.8);
-  }
-}
-
-/* Improved mobile experience */
-@media (max-width: 768px) {
-  .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-  
-  /* Optimize canvas for mobile */
-  canvas {
-    image-rendering: optimizeSpeed;
-    image-rendering: -webkit-optimize-contrast;
-  }
-}
-
-/* Scroll performance optimizations */
-* {
-  scroll-behavior: auto; /* Let Lenis handle smooth scrolling */
-}
-
-/* Reduce paint complexity during scroll */
-.history-item,
-.timeline-event {
-  contain: layout style;
-  will-change: transform, opacity;
-}
-
-/* Optimize transforms for better performance */
-.period-image {
-  will-change: transform;
-  backface-visibility: hidden;
 }
