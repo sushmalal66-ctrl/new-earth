@@ -11,25 +11,26 @@ interface SceneProps {
 const Scene: React.FC<SceneProps> = ({ earthProgress }) => {
   return (
     <Suspense fallback={null}>
-      {/* Simplified Lighting Setup - Remove duplicates from Earth component */}
-      <ambientLight intensity={0.15} color="#001122" />
-      
+      {/* Lighting Setup */}
+      <ambientLight intensity={0.2} color="#f0f8ff" />
       <directionalLight 
         position={[10, 5, 5]} 
-        intensity={1.2}
+        intensity={1.5}
         color="#ffffff"
         castShadow={false}
       />
-      
       <directionalLight 
         position={[-5, -2, -5]} 
-        intensity={0.4}
-        color="#00aaff"
+        intensity={0.3}
+        color="#4169e1"
+      />
+      <pointLight 
+        position={[0, 0, 8]} 
+        intensity={0.5}
+        color="#87ceeb"
+        distance={20}
       />
 
-      {/* Environment for better contrast */}
-      <Environment preset="night" />
-      
       {/* Sparse Star Field */}
       <Stars 
         radius={100} 
@@ -40,10 +41,10 @@ const Scene: React.FC<SceneProps> = ({ earthProgress }) => {
         fade={true}
         speed={0.5}
       />
-      
+
       {/* Particle Field */}
       <ParticleField earthProgress={earthProgress} />
-      
+
       {/* Main Earth */}
       <Earth earthProgress={earthProgress} />
     </Suspense>
