@@ -302,25 +302,6 @@ const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
       clearTimeout(timer);
     };
   }, []);
-          }
-        });
-      }
-    });
-
-    // Cleanup function
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => {
-        if (trigger.vars.trigger === container) {
-          trigger.kill();
-        }
-      });
-    };
-  }, [earthProgress, onProgressChange, activeEra, timelineEras.length]);
-
-  // Initialize typing animations for first era
-  useEffect(() => {
-    setShowTyping({ 0: true });
-  }, []);
 
   return (
     <div 
