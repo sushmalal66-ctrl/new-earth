@@ -173,134 +173,106 @@ const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
     const container = containerRef.current;
     const timeline = timelineRef.current;
     
-    let ctx = gsap.context(() => {
-      // Calculate total scroll distance for horizontal movement
-      const totalWidth = timeline.scrollWidth - window.innerWidth;
-      
-      // Create horizontal scroll animation
-      const horizontalScroll = gsap.to(timeline, {
-        x: -totalWidth,
-        ease: "none",
-        scrollTrigger: {
-          trigger: container,
-          start: "top top",
-          end: () => `+=${totalWidth}`,
-          scrub: 1,
-          pin: true,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-          refreshPriority: -1,
-          onUpdate: (self) => {
-            const progress = self.progress;
+    // Calculate total scroll distance for horizontal movement
+    const totalWidth = timeline.scrollWidth - window.innerWidth;
+    
+    // Create horizontal scroll animation
+    const horizontalScroll = gsap.to(timeline, {
+      x: -totalWidth,
+      ease: "none",
+      scrollTrigger: {
+        trigger: container,
+        start: "top top",
+        end: () => `+=${totalWidth}`,
+        scrub: 1,
+        pin: true,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          const progress = self.progress;
+          
+          // Update Earth rotation based on scroll progress
+          earthProgress.set(progress);
+          onProgressChange(progress);
+          
+          // Determine active era based on scroll progress
+          const newActiveEra = Math.floor(progress * (timelineEras.length - 1));
+          if (newActiveEra !== activeEra) {
+            setActiveEra(newActiveEra);
             
-            // Update Earth rotation based on scroll progress
-            earthProgress.set(progress);
-            onProgressChange(progress);
-            
-            // Determine active era based on scroll progress
-            const newActiveEra = Math.floor(progress * (timelineEras.length - 1));
-            if (newActiveEra !== activeEra) {
-              setActiveEra(newActiveEra);
-              
-              // Trigger typing animation for new era
-              setShowTyping(prev => ({
-                ...prev,
-                [newActiveEra]: true
-              }));
-            }
-            
-            // Update CSS custom property for other animations
-            document.documentElement.style.setProperty('--timeline-progress', progress.toString());
+            // Trigger typing animation for new era
+            setShowTyping(prev => ({
+              ...prev,
+              [newActiveEra]: true
+            }));
+          }
+          
+          // Update CSS custom property for other animations
+          document.documentElement.style.setProperty('--timeline-progress', progress.toString());
+        }
+      }
+    });
+
+    // Individual card animations
+    timelineEras.forEach((era, index) => {
+      const card = container.querySelector(`[data-era="${era.id}"]`);
+      if (!card) return;
+
+      // Card entrance animation
+      gsap.fromTo(card, 
+        { 
+          opacity: 0, 
+          y: 100,
+          scale: 0.8
+        },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: card,
+            start: "left 80%",
+            end: "left 20%",
+            horizontal: true,
+            toggleActions: "play none none reverse",
+            containerAnimation: horizontalScroll
           }
         }
-      });
+      );
 
-      // Individual card animations
-      timelineEras.forEach((era, index) => {
-        const card = container.querySelector(`[data-era="${era.id}"]`);
-        if (!card) return;
-
-        // Card entrance animation
-        gsap.fromTo(card, 
-          { 
-            opacity: 0, 
-            y: 100,
-            scale: 0.8
-          },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 1,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: card,
-              start: "left 80%",
-              end: "left 20%",
-              horizontal: true,
-              toggleActions: "play none none reverse",
-              containerAnimation: horizontalScroll,
-              refreshPriority: -2
-            }
+      // Parallax effect for card images
+      const image = card.querySelector('.era-image');
+      if (image) {
+        gsap.to(image, {
+          x: -50,
+          ease: "none",
+          scrollTrigger: {
+            trigger: card,
+            start: "left right",
+            end: "right left",
+            scrub: 1,
+            horizontal: true,
+            containerAnimation: horizontalScroll
           }
-        );
-
-        // Parallax effect for card images
-        const image = card.querySelector('.era-image');
-        if (image) {
-          gsap.to(image, {
-            x: -50,
-            ease: "none",
-            scrollTrigger: {
-              trigger: card,
-              start: "left right",
-              end: "right left",
-              scrub: 1,
-              horizontal: true,
-              containerAnimation: horizontalScroll,
-              refreshPriority: -3
-            }
-          });
-        }
-      });
-    }, container);
+        });
+      }
+    });
 
     // Cleanup function
     return () => {
-      ctx.revert();
+      ScrollTrigger.getAll().forEach(trigger => {
+        if (trigger.vars.trigger === container) {
+          trigger.kill();
+        }
+      });
     };
   }, [earthProgress, onProgressChange, activeEra, timelineEras.length]);
 
-  // Separate effect for floating animations to avoid conflicts
-  useEffect(() => {
-    let ctx = gsap.context(() => {
-      // Simplified floating animation
-      gsap.to('.floating-element', {
-        y: -15,
-        rotation: 3,
-        duration: 4,
-        ease: "power2.inOut",
-        repeat: -1,
-        yoyo: true,
-        stagger: 0.3,
-        force3D: true
-      });
-    });
-
-    return () => {
-      ctx.revert();
-    };
-  }, []);
-
   // Initialize typing animations for first era
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowTyping({ 0: true });
-    }, 500);
-    
-    return () => {
-      clearTimeout(timer);
-    };
+    setShowTyping({ 0: true });
   }, []);
 
   return (

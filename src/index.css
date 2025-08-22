@@ -20,7 +20,7 @@
 }
 
 html {
-  scroll-behavior: auto;
+  scroll-behavior: auto; /* Let Lenis handle smooth scrolling */
   overflow-x: hidden;
 }
 
@@ -34,10 +34,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   background: linear-gradient(135deg, #000000 0%, #111827 50%, #1f2937 100%);
-  overscroll-behavior: none;
 }
 
 /* Performance optimizations */
+* {
+  will-change: auto;
+}
+
 .gpu-accelerated {
   transform: translateZ(0);
   will-change: transform;
@@ -49,13 +52,11 @@ body {
   will-change: transform;
   backface-visibility: hidden;
   transform: translateZ(0);
-  contain: layout style paint;
 }
 
 .timeline-card {
   contain: layout style paint;
   will-change: transform, opacity;
-  transform: translateZ(0);
 }
 
 /* Custom scrollbar */

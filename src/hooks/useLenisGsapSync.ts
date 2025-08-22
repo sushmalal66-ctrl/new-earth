@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useMotionValue } from 'framer-motion';
-import Lenis from 'lenis';
+import Lenis from '@studio-freight/lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -17,28 +17,32 @@ export const useLenisGsapSync = () => {
   useEffect(() => {
     // Initialize Lenis with optimized settings
     const lenis = new Lenis({
-      lerp: 0.1,
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      direction: 'vertical',
+      gestureDirection: 'vertical',
       smooth: true,
+      mouseMultiplier: 1,
       smoothTouch: false,
-      wheelMultiplier: 1,
       touchMultiplier: 2,
+      infinite: false,
+      autoResize: true,
       normalizeWheel: true,
-      autoResize: true
+      syncTouch: true,
+      // Enhanced settings for horizontal scroll compatibility
+      lerp: 0.1,
+      wheelMultiplier: 1,
+      touchInertiaMultiplier: 35
     });
 
     lenisRef.current = lenis;
 
     // Configure ScrollTrigger to work with Lenis
-    lenis.on('scroll', ScrollTrigger.update);
-    
-    ScrollTrigger.scrollerProxy(document.documentElement, {
+    ScrollTrigger.scrollerProxy(document.body, {
       scrollTop(value) {
-        if (arguments.length) {
-          lenis.scrollTo(value, { immediate: true });
-        }
-        return lenis.animatedScroll;
+        return arguments.length 
+          ? lenis.scrollTo(value, { immediate: true })
+          : window.scrollY;
       },
       getBoundingClientRect() {
         return {
@@ -48,23 +52,34 @@ export const useLenisGsapSync = () => {
           height: window.innerHeight
         };
       },
-      pinType: document.documentElement.style.transform ? 'transform' : 'fixed'
+      pinType: document.body.style.transform ? 'transform' : 'fixed'
     });
 
     // Set ScrollTrigger defaults with enhanced settings for horizontal scroll
     ScrollTrigger.defaults({ 
-      scroller: document.documentElement
+      scroller: document.body,
+      refreshPriority: 0,
+      anticipatePin: 1
+    });
+
+    // Configure ScrollTrigger for better performance with horizontal scrolling
+    ScrollTrigger.config({
+      autoRefreshEvents: "visibilitychange,DOMContentLoaded,load,resize",
+      limitCallbacks: true,
+      ignoreMobileResize: true
     });
 
     // Sync Lenis with GSAP ticker for perfect synchronization
-    gsap.ticker.add((time) => {
+    const raf = (time: number) => {
       lenis.raf(time);
-    });
-    
-    gsap.ticker.lagSmoothing(0);
+      rafId.current = requestAnimationFrame(raf);
+    };
+    rafId.current = requestAnimationFrame(raf);
 
     // Update ScrollTrigger on Lenis scroll
     lenis.on('scroll', ({ scroll, limit, velocity, direction, progress }) => {
+      ScrollTrigger.update();
+      
       // Update motion values
       scrollProgress.set(progress);
       
@@ -86,17 +101,25 @@ export const useLenisGsapSync = () => {
       }));
     });
 
-    // Initial refresh
-    ScrollTrigger.refresh();
+    // Refresh ScrollTrigger after Lenis is ready
+    ScrollTrigger.addEventListener('refresh', () => {
+      lenis.resize();
+    });
+    
+    // Delayed refresh to ensure proper initialization
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
 
     // Cleanup function
     return () => {
-      gsap.ticker.remove((time) => {
-        lenis.raf(time * 1000);
-      });
+      if (rafId.current) {
+        cancelAnimationFrame(rafId.current);
+      }
       lenis.off('scroll');
       lenis.destroy();
-      ScrollTrigger.killAll();
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      ScrollTrigger.clearScrollMemory();
     };
   }, [scrollProgress, earthProgress, timelineProgress]);
 
