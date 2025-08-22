@@ -54,8 +54,8 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
         'Development of early atmosphere'
       ],
       icon: Star,
-      color: '#ff6b35',
-      gradient: 'from-orange-500 to-red-600',
+      color: '#64748b',
+      gradient: 'from-slate-600 to-slate-500',
       image: 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=800&h=600&fit=crop'
     },
     {
@@ -72,8 +72,8 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
         'Emergence of hydrothermal vents'
       ],
       icon: Waves,
-      color: '#4a90e2',
-      gradient: 'from-blue-600 to-cyan-500',
+      color: '#475569',
+      gradient: 'from-slate-700 to-blue-600',
       image: 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=800&h=600&fit=crop'
     },
     {
@@ -90,8 +90,8 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
         'Snowball Earth periods'
       ],
       icon: Leaf,
-      color: '#7ed321',
-      gradient: 'from-green-500 to-emerald-600',
+      color: '#334155',
+      gradient: 'from-slate-800 to-blue-700',
       image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop'
     },
     {
@@ -108,8 +108,8 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
         'First vertebrates appear'
       ],
       icon: Mountain,
-      color: '#9013fe',
-      gradient: 'from-purple-500 to-pink-600',
+      color: '#1e293b',
+      gradient: 'from-slate-900 to-blue-800',
       image: 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=800&h=600&fit=crop'
     },
     {
@@ -126,8 +126,8 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
         'Space exploration begins'
       ],
       icon: Users,
-      color: '#50e3c2',
-      gradient: 'from-teal-500 to-blue-600',
+      color: '#0f172a',
+      gradient: 'from-slate-950 to-blue-900',
       image: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=800&h=600&fit=crop'
     }
   ];
@@ -215,10 +215,12 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
           </motion.div>
           
           <h2 className="text-6xl md:text-8xl font-bold mb-8 bg-gradient-to-r from-blue-300 via-white to-blue-100 bg-clip-text text-transparent">
-            Earth's Epic Story
+            <span className="bg-gradient-to-r from-slate-200 via-blue-200 to-slate-300 bg-clip-text text-transparent">
+              Earth's Epic Story
+            </span>
           </h2>
           
-          <p className="text-xl md:text-2xl text-blue-100/80 max-w-4xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-slate-300 max-w-4xl mx-auto leading-relaxed">
             Witness the incredible transformation of our planet through 4.6 billion years 
             of evolution, from a molten ball of rock to the vibrant world we call home
           </p>
@@ -249,44 +251,44 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
                     whileHover={{ scale: 1.05 }}
                   >
                     <IconComponent className="w-5 h-5 text-white mr-3" />
-                    <span className="text-white font-semibold">{period.era}</span>
+                    <span className="text-slate-100 font-semibold">{period.era}</span>
                   </motion.div>
 
                   {/* Time Indicator */}
-                  <div className="text-blue-300/80 text-lg font-medium">
+                  <div className="text-slate-400 text-lg font-medium">
                     {period.timeAgo}
                   </div>
 
                   {/* Title */}
                   <div>
-                    <h3 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
+                    <h3 className="text-4xl md:text-5xl font-bold text-slate-100 mb-4 leading-tight">
                       {period.title}
                     </h3>
-                    <h4 className="text-xl md:text-2xl text-blue-200 font-medium mb-6">
+                    <h4 className="text-xl md:text-2xl text-slate-300 font-medium mb-6">
                       {period.subtitle}
                     </h4>
                   </div>
 
                   {/* Description */}
-                  <p className="text-lg text-blue-100/80 leading-relaxed max-w-2xl">
+                  <p className="text-lg text-slate-300 leading-relaxed max-w-2xl">
                     {period.description}
                   </p>
 
                   {/* Key Events */}
                   <div className="space-y-4">
-                    <h5 className="text-lg font-semibold text-white flex items-center">
-                      <Sparkles className="w-5 h-5 mr-2 text-blue-400" />
+                    <h5 className="text-lg font-semibold text-slate-100 flex items-center">
+                      <Sparkles className="w-5 h-5 mr-2 text-slate-400" />
                       Key Developments
                     </h5>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {period.keyEvents.map((event, eventIndex) => (
                         <motion.div
                           key={eventIndex}
-                          className="flex items-start space-x-3 p-4 bg-black/30 backdrop-blur-sm border border-blue-500/10 rounded-xl hover:border-blue-400/30 transition-all duration-300"
+                          className="flex items-start space-x-3 p-4 bg-slate-900/30 backdrop-blur-sm border border-slate-700/20 rounded-xl hover:border-slate-500/40 transition-all duration-300"
                           whileHover={{ scale: 1.02, x: 5 }}
                         >
                           <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${period.gradient} mt-2 flex-shrink-0`} />
-                          <span className="text-blue-100/70 text-sm leading-relaxed">{event}</span>
+                          <span className="text-slate-400 text-sm leading-relaxed">{event}</span>
                         </motion.div>
                       ))}
                     </div>
@@ -294,7 +296,7 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
 
                   {/* Learn More Button */}
                   <motion.button
-                    className={`inline-flex items-center px-8 py-4 bg-gradient-to-r ${period.gradient} hover:shadow-lg hover:shadow-${period.color}/25 text-white font-semibold rounded-xl transition-all duration-300`}
+                    className={`inline-flex items-center px-8 py-4 bg-gradient-to-r ${period.gradient} hover:shadow-lg text-slate-100 font-semibold rounded-xl transition-all duration-300`}
                     whileHover={{ scale: 1.05, x: 5 }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -359,22 +361,22 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
 
         {/* Section Footer */}
         <motion.div 
-          className="text-center mt-32 pt-16 border-t border-blue-500/20"
+          className="text-center mt-32 pt-16 border-t border-slate-700/30"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
           viewport={{ once: true }}
         >
-          <h3 className="text-3xl md:text-4xl font-bold text-white mb-6">
+          <h3 className="text-3xl md:text-4xl font-bold text-slate-100 mb-6">
             The Story Continues
           </h3>
-          <p className="text-lg text-blue-100/70 max-w-2xl mx-auto mb-8">
+          <p className="text-lg text-slate-300 max-w-2xl mx-auto mb-8">
             Earth's journey is far from over. Every day brings new discoveries, 
             challenges, and opportunities to shape our planet's future.
           </p>
           
           <motion.button
-            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-blue-500/25 transition-all duration-300"
+            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-slate-600 to-blue-600 hover:from-slate-500 hover:to-blue-500 text-slate-100 font-semibold rounded-xl shadow-lg transition-all duration-300"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -390,7 +392,7 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
         {[...Array(15)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 bg-blue-400/20 rounded-full"
+            className="absolute w-2 h-2 bg-slate-400/30 rounded-full"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,

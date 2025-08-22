@@ -1,12 +1,10 @@
 import React from 'react';
-import Hero from './components/Hero';
 import ScrollEarthSection from './components/ScrollEarthSection';
 import './index.css';
 
 function App() {
   return (
-    <div className="relative bg-black text-white">
-      <Hero />
+    <div className="relative bg-gradient-to-b from-slate-900 via-blue-950 to-black text-white">
       <ScrollEarthSection />
     </div>
   );

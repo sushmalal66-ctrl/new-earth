@@ -34,7 +34,7 @@ const CloudTransition: React.FC<CloudTransitionProps> = ({ opacity, isActive }) 
       {cloudLayers.map((cloud) => (
         <motion.div
           key={cloud.id}
-          className="cloud-layer absolute rounded-full bg-gradient-to-br from-white/10 to-blue-100/5"
+          className="cloud-layer absolute rounded-full bg-gradient-to-br from-slate-200/15 to-blue-200/8"
           style={{
             width: `${cloud.size}px`,
             height: `${cloud.size}px`,
@@ -62,7 +62,7 @@ const CloudTransition: React.FC<CloudTransitionProps> = ({ opacity, isActive }) 
         {Array.from({ length: 30 }).map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-1 h-1 bg-white/30 rounded-full"
+            className="absolute w-1 h-1 bg-slate-300/40 rounded-full"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -83,7 +83,7 @@ const CloudTransition: React.FC<CloudTransitionProps> = ({ opacity, isActive }) 
 
       {/* Atmospheric Glow */}
       <motion.div
-        className="absolute inset-0 bg-gradient-radial from-blue-400/5 via-transparent to-transparent"
+        className="absolute inset-0 bg-gradient-radial from-slate-400/8 via-transparent to-transparent"
         animate={isActive ? {
           scale: [1, 1.5, 1],
           opacity: [0.3, 0.6, 0.3],
