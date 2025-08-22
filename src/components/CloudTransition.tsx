@@ -9,30 +9,30 @@ interface CloudTransitionProps {
 const CloudTransition: React.FC<CloudTransitionProps> = ({ opacity, isActive }) => {
   const cloudsRef = useRef<HTMLDivElement>(null);
 
-  // Reduced cloud layers for better performance
+  // Minimal cloud layers for optimal performance
   const cloudLayers = useMemo(() => {
-    return Array.from({ length: 4 }, (_, i) => ({
+    return Array.from({ length: 2 }, (_, i) => ({
       id: i,
-      size: 150 + i * 80,
+      size: 200 + i * 100,
       left: Math.random() * 100,
       top: Math.random() * 100,
-      animationDelay: i * 0.8,
-      opacity: 0.08 + (i * 0.03),
-      blur: 15 + i * 8
+      animationDelay: i * 0.5,
+      opacity: 0.1 + (i * 0.05),
+      blur: 20 + i * 10
     }));
   }, []);
 
   return (
     <motion.div
       ref={cloudsRef}
-      className="fixed inset-0 z-15 pointer-events-none will-change-transform"
+      className="fixed inset-0 z-15 pointer-events-none will-change-opacity"
       style={{ opacity }}
     >
-      {/* Reduced Cloud Layers */}
+      {/* Minimal Cloud Layers */}
       {cloudLayers.map((cloud) => (
         <motion.div
           key={cloud.id}
-          className="cloud-layer absolute rounded-full bg-gradient-to-br from-slate-200/10 to-blue-200/5"
+          className="absolute rounded-full bg-gradient-to-br from-slate-200/10 to-blue-200/5 will-change-transform"
           style={{
             width: `${cloud.size}px`,
             height: `${cloud.size}px`,
@@ -42,7 +42,7 @@ const CloudTransition: React.FC<CloudTransitionProps> = ({ opacity, isActive }) 
             opacity: cloud.opacity,
           }}
           animate={isActive ? {
-            scale: [1, 1.1, 1],
+            scale: [1, 1.05, 1],
             x: [0, 15, 0],
             y: [0, -8, 0],
           } : {}}
@@ -55,9 +55,9 @@ const CloudTransition: React.FC<CloudTransitionProps> = ({ opacity, isActive }) 
         />
       ))}
 
-      {/* Reduced Particle Effects */}
+      {/* Minimal Particle Effects */}
       <div className="absolute inset-0">
-        {Array.from({ length: 15 }).map((_, i) => (
+        {Array.from({ length: 8 }).map((_, i) => (
           <motion.div
             key={i}
             className="absolute w-0.5 h-0.5 bg-slate-300/30 rounded-full"
@@ -71,23 +71,23 @@ const CloudTransition: React.FC<CloudTransitionProps> = ({ opacity, isActive }) 
               scale: [0.3, 0.8, 0.3],
             } : {}}
             transition={{
-              duration: 2.5 + Math.random() * 1.5,
+              duration: 2 + Math.random() * 1,
               repeat: Infinity,
-              delay: Math.random() * 1.5,
+              delay: Math.random() * 1,
             }}
           />
         ))}
       </div>
 
-      {/* Simplified Atmospheric Glow */}
+      {/* Minimal Atmospheric Glow */}
       <motion.div
-        className="absolute inset-0 bg-gradient-radial from-slate-400/5 via-transparent to-transparent"
+        className="absolute inset-0 bg-gradient-radial from-slate-400/3 via-transparent to-transparent will-change-transform"
         animate={isActive ? {
-          scale: [1, 1.3, 1],
-          opacity: [0.2, 0.4, 0.2],
+          scale: [1, 1.1, 1],
+          opacity: [0.1, 0.2, 0.1],
         } : {}}
         transition={{
-          duration: 4,
+          duration: 3,
           repeat: Infinity,
           ease: "easeInOut"
         }}

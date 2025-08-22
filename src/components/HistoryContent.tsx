@@ -17,7 +17,9 @@ import {
 
 gsap.registerPlugin(ScrollTrigger);
 
-interface HistoryContentProps {}
+interface HistoryContentProps {
+  scrollProgress: number;
+}
 
 interface HistoryPeriod {
   id: string;
@@ -33,7 +35,7 @@ interface HistoryPeriod {
   image: string;
 }
 
-const HistoryContent: React.FC<HistoryContentProps> = () => {
+const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const periodsRef = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -133,101 +135,108 @@ const HistoryContent: React.FC<HistoryContentProps> = () => {
   useEffect(() => {
     if (!contentRef.current) return;
 
-    // Optimize ScrollTrigger performance
-    ScrollTrigger.config({
-      autoRefreshEvents: "visibilitychange,DOMContentLoaded,load"
-    });
-    
-    // Use RAF for better performance
-    ScrollTrigger.config({ autoRefreshEvents: "visibilitychange,DOMContentLoaded,load,resize" });
-    ScrollTrigger.refresh();
-
-    const ctx = gsap.context(() => {
-      // Use ScrollTrigger.batch for better performance
-      const validPeriods = periodsRef.current.filter(Boolean);
-      
-      ScrollTrigger.batch(validPeriods, {
-        onEnter: (elements) => {
-          gsap.fromTo(elements,
-            { 
-              opacity: 0, 
-              y: 150,
-              scale: 0.8,
-              rotateX: -20
-            },
-            {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              rotateX: 0,
-              duration: 1.5,
-              ease: "power3.out",
-              stagger: 0.2,
-              overwrite: "auto", // Prevent animation conflicts
-              force3D: true
-            }
-          );
-        },
-        onLeave: (elements) => {
-          gsap.to(elements, {
-            opacity: 0.3,
-            scale: 0.95,
-            duration: 0.5,
-            overwrite: "auto",
-            force3D: true
-          });
-        },
-        onEnterBack: (elements) => {
-          gsap.to(elements, {
-            opacity: 1,
-            scale: 1,
-            duration: 0.5,
-            overwrite: "auto",
-            force3D: true
-          });
-        },
-        start: "top 85%",
-        end: "top 15%"
+    // Debounce ScrollTrigger setup
+    const setupScrollTrigger = () => {
+      // Optimize ScrollTrigger performance
+      ScrollTrigger.config({
+        autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
+        limitCallbacks: true
       });
 
-      // Separate parallax animations for images
-      validPeriods.forEach((period) => {
-        const image = period.querySelector('.period-image');
-        if (image) {
-          // Use will-change for better performance
-          gsap.set(image, { willChange: "transform" });
-          gsap.to(image, {
-            y: -50,
-            scale: 1.1,
-            ease: "none",
-            scrollTrigger: {
-              trigger: period,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: 0.5,
-              refreshPriority: -1, // Lower priority for parallax
-              invalidateOnRefresh: true
+      const ctx = gsap.context(() => {
+        // Use ScrollTrigger.batch for better performance
+        const validPeriods = periodsRef.current.filter(Boolean);
+        
+        if (validPeriods.length === 0) return;
+        
+        ScrollTrigger.batch(validPeriods, {
+          onEnter: (elements) => {
+            gsap.fromTo(elements,
+              { 
+                opacity: 0, 
+                y: 100,
+                scale: 0.9
+              },
+              {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                duration: 1,
+                ease: "power2.out",
+                stagger: 0.1,
+                overwrite: "auto",
+                force3D: true
+              }
+            );
+          },
+          onLeave: (elements) => {
+            gsap.to(elements, {
+              opacity: 0.5,
+              scale: 0.98,
+              duration: 0.3,
+              overwrite: "auto",
+              force3D: true
+            });
+          },
+          onEnterBack: (elements) => {
+            gsap.to(elements, {
+              opacity: 1,
+              scale: 1,
+              duration: 0.3,
+              overwrite: "auto",
+              force3D: true
+            });
+          },
+          start: "top 80%",
+          end: "top 20%",
+          refreshPriority: -1
+        });
+
+        // Simplified parallax for images (only on high performance)
+        if (window.innerWidth > 768) {
+          validPeriods.forEach((period, index) => {
+            const image = period?.querySelector('.period-image');
+            if (image) {
+              gsap.set(image, { willChange: "transform" });
+              gsap.to(image, {
+                y: -30,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: period,
+                  start: "top bottom",
+                  end: "bottom top",
+                  scrub: 1,
+                  refreshPriority: -2,
+                  invalidateOnRefresh: true
+                }
+              });
             }
           });
         }
-      });
 
-      // Floating animation for decorative elements
-      gsap.to('.floating-element', {
-        y: -20,
-        rotation: 5,
-        duration: 3,
-        ease: "power2.inOut",
-        repeat: -1,
-        yoyo: true,
-        stagger: 0.5,
-        paused: false,
-        force3D: true
-      });
+        // Simplified floating animation
+        gsap.to('.floating-element', {
+          y: -15,
+          rotation: 3,
+          duration: 4,
+          ease: "power2.inOut",
+          repeat: -1,
+          yoyo: true,
+          stagger: 0.3,
+          force3D: true
+        });
 
-    }, contentRef);
+      }, contentRef);
 
-    return () => ctx.revert();
+      return () => ctx.revert();
+    };
+    
+    // Delay setup to avoid blocking scroll
+    const timeoutId = setTimeout(setupScrollTrigger, 100);
+    
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   // Cleanup on unmount

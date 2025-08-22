@@ -19,50 +19,53 @@ const ScrollEarthSection: React.FC = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isInCloudTransition, setIsInCloudTransition] = useState(false);
   const [performanceLevel, setPerformanceLevel] = useState<'high' | 'medium' | 'low'>('high');
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Motion values for smooth animations
   const cloudOpacity = useMotionValue(0);
   const contentOpacity = useMotionValue(0);
   const canvasOpacity = useMotionValue(1);
 
-  // Single scroll handler using only Lenis
+  // Optimized scroll handler with throttling and RAF
   const handleScroll = useCallback((scroll: number, limit: number) => {
     if (!containerRef.current || limit === 0) return;
     
-    const progress = Math.min(Math.max(scroll / (limit * 0.8), 0), 1); // Normalize to 0-1
-    
-    // Update scroll progress (throttled by Lenis itself)
-    setScrollProgress(progress);
-    
-    // Update motion values directly (no React re-render)
-    cloudOpacity.set(progress > 0.3 && progress < 0.7 ? 
-      Math.min((progress - 0.3) / 0.2, (0.7 - progress) / 0.2) * 0.8 : 0);
-    contentOpacity.set(progress > 0.15 && progress < 0.85 ? 1 : 0);
-    
-    // Cloud transition logic
-    const shouldShowClouds = progress > 0.35 && progress < 0.75;
-    if (shouldShowClouds !== isInCloudTransition) {
-      setIsInCloudTransition(shouldShowClouds);
-    }
-
-    // Update Earth component directly
-    if (earthRef.current?.updateScroll) {
-      earthRef.current.updateScroll(progress);
-    }
-
-    // Use motion value instead of direct DOM manipulation
-    const opacity = Math.max(0.7, 1 - progress * 0.3);
-    canvasOpacity.set(opacity);
-
-    // Direct canvas transformations (no GSAP conflicts)
-    // Keep canvas fixed and let Three.js handle positioning
-    if (canvasRef.current) {
-      // Only apply minimal opacity changes
-      const opacity = Math.max(0.7, 1 - progress * 0.3);
-      canvasRef.current.style.opacity = opacity.toString();
-      canvasRef.current.style.transform = 'none'; // Remove conflicting transforms
-    }
+    // Use RAF for smooth updates
+    requestAnimationFrame(() => {
+      const progress = Math.min(Math.max(scroll / (limit * 0.8), 0), 1);
+      
+      // Set scrolling state
+      setIsScrolling(true);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+      scrollTimeoutRef.current = setTimeout(() => setIsScrolling(false), 150);
+      
+      // Batch state updates
+      setScrollProgress(progress);
+      
+      // Direct motion value updates (no re-render)
+      const cloudOpacityValue = progress > 0.3 && progress < 0.7 ? 
+        Math.min((progress - 0.3) / 0.2, (0.7 - progress) / 0.2) * 0.8 : 0;
+      const contentOpacityValue = progress > 0.15 && progress < 0.85 ? 1 : 0;
+      const canvasOpacityValue = Math.max(0.7, 1 - progress * 0.3);
+      
+      cloudOpacity.set(cloudOpacityValue);
+      contentOpacity.set(contentOpacityValue);
+      canvasOpacity.set(canvasOpacityValue);
+      
+      // Cloud transition logic (only update when crossing thresholds)
+      const shouldShowClouds = progress > 0.35 && progress < 0.75;
+      if (shouldShowClouds !== isInCloudTransition) {
+        setIsInCloudTransition(shouldShowClouds);
+      }
+      
+      // Update Earth component directly
+      if (earthRef.current?.updateScroll) {
+        earthRef.current.updateScroll(progress);
+      }
+    });
   }, [isInCloudTransition, cloudOpacity, contentOpacity, canvasOpacity]);
+    
 
   // Lenis scroll handler - single source of truth
   const lenis = useLenis(({ scroll, limit }) => {
@@ -71,14 +74,28 @@ const ScrollEarthSection: React.FC = () => {
 
   // Performance monitoring and adaptive quality
   useEffect(() => {
-    // Auto-adjust performance based on device capabilities
-    const canvas = document.querySelector('canvas');
-    if (canvas) {
-      const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-      if (!gl || navigator.hardwareConcurrency < 4) {
-        setPerformanceLevel('medium');
+    // Optimize performance based on device
+    const checkPerformance = () => {
+      const canvas = document.querySelector('canvas');
+      if (canvas) {
+        const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+        if (!gl || navigator.hardwareConcurrency < 4) {
+          setPerformanceLevel('medium');
+        }
       }
-    }
+    };
+    
+    // Delay performance check to avoid blocking initial render
+    setTimeout(checkPerformance, 100);
+  }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
   }, []);
 
   return (
@@ -91,7 +108,7 @@ const ScrollEarthSection: React.FC = () => {
         {/* Fixed 3D Earth Canvas */}
         <div 
           ref={canvasRef}
-          className="fixed inset-0 z-10 pointer-events-none canvas-container"
+          className="fixed inset-0 z-10 pointer-events-none canvas-container will-change-transform"
         >
           <motion.div style={{ opacity: canvasOpacity }}>
             <Canvas
@@ -106,7 +123,7 @@ const ScrollEarthSection: React.FC = () => {
               }}
               dpr={performanceLevel === 'high' ? Math.min(window.devicePixelRatio, 2) : 1}
               performance={{ min: 0.5, max: 1 }}
-              frameloop="demand" // Only render when needed
+              frameloop={isScrolling ? "always" : "demand"} // Render continuously while scrolling
             >
               <PerformanceMonitor
                 onIncline={() => setPerformanceLevel('high')}
@@ -196,7 +213,7 @@ const ScrollEarthSection: React.FC = () => {
       </div>
 
       {/* Cloud Transition Layer - Only render when needed */}
-      {isInCloudTransition && (
+      {(isInCloudTransition || cloudOpacity.get() > 0) && (
         <CloudTransition 
           opacity={cloudOpacity}
           isActive={isInCloudTransition}
@@ -246,8 +263,8 @@ const ScrollEarthSectionWithLenis: React.FC = () => {
     <ReactLenis 
       root 
       options={{
-        duration: 1.2,
-        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        duration: 0.8,
+        easing: (t) => 1 - Math.pow(1 - t, 3),
         direction: 'vertical',
         gestureDirection: 'vertical',
         smooth: true,
