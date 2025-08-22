@@ -10,7 +10,7 @@ gsap.registerPlugin(ScrollTrigger);
 export const useLenisGsapSync = () => {
   const lenisRef = useRef<Lenis | null>(null);
   const scrollProgress = useMotionValue(0);
-  const earthProgress = useMotionValue(1);
+  const earthProgress = useMotionValue(0);
   const rafId = useRef<number>();
 
   useEffect(() => {
