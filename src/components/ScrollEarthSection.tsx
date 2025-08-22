@@ -151,9 +151,9 @@ const ScrollEarthSection: React.FC = () => {
           >
             <h1 className="text-7xl md:text-9xl lg:text-[12rem] font-bold mb-4 tracking-tight leading-none">
               <span 
-                className="bg-gradient-to-b from-slate-100 via-blue-100 to-slate-300 bg-clip-text text-transparent"
+                className="bg-gradient-to-b from-gray-100 via-gray-200 to-gray-400 bg-clip-text text-transparent"
                 style={{
-                  filter: 'drop-shadow(0 0 40px rgba(148, 163, 184, 0.4))',
+                  filter: 'drop-shadow(0 0 40px rgba(107, 114, 128, 0.3))',
                 }}
               >
                 EARTH
@@ -167,7 +167,7 @@ const ScrollEarthSection: React.FC = () => {
             transition={{ duration: 1.2, ease: "easeOut", delay: 1 }}
             className="mb-12"
           >
-            <p className="text-xl md:text-2xl lg:text-3xl text-slate-300 font-light tracking-wide leading-relaxed max-w-4xl mx-auto">
+            <p className="text-xl md:text-2xl lg:text-3xl text-gray-300 font-light tracking-wide leading-relaxed max-w-4xl mx-auto">
               Journey Through 4.6 Billion Years of Wonder
             </p>
           </motion.div>
@@ -178,7 +178,7 @@ const ScrollEarthSection: React.FC = () => {
             transition={{ duration: 1, ease: "easeOut", delay: 1.5 }}
             className="mb-16"
           >
-            <p className="text-base md:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
               Discover the incredible story of our planet through an immersive 
               experience that brings Earth's magnificent history to life
             </p>
@@ -194,16 +194,16 @@ const ScrollEarthSection: React.FC = () => {
           whileHover={{ scale: 1.1 }}
         >
           <div className="flex flex-col items-center space-y-3">
-            <span className="text-slate-400 text-sm font-medium tracking-wide">
+            <span className="text-gray-400 text-sm font-medium tracking-wide">
               Scroll to explore
             </span>
             <motion.div 
-              className="w-8 h-12 border-2 border-slate-400 rounded-full flex justify-center relative overflow-hidden"
+              className="w-8 h-12 border-2 border-gray-400 rounded-full flex justify-center relative overflow-hidden"
               animate={{ y: [0, 8, 0] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
               <motion.div 
-                className="w-1 h-3 bg-slate-400 rounded-full mt-2"
+                className="w-1 h-3 bg-gray-400 rounded-full mt-2"
                 animate={{ y: [0, 16, 0], opacity: [1, 0, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               />
@@ -232,26 +232,26 @@ const ScrollEarthSection: React.FC = () => {
       </div>
 
       {/* Simplified Progress Indicator */}
-      <div className="fixed top-1/2 right-8 transform -translate-y-1/2 z-30">
-        <div className="w-1 h-32 bg-slate-700 rounded-full overflow-hidden">
+      <div className="fixed top-1/2 right-8 transform -translate-y-1/2 z-30 opacity-80">
+        <div className="w-1 h-32 bg-gray-800 rounded-full overflow-hidden">
           <motion.div
-            className="w-full bg-gradient-to-t from-blue-400 to-slate-300 rounded-full origin-bottom"
+            className="w-full bg-gradient-to-t from-gray-400 to-gray-300 rounded-full origin-bottom"
             style={{ 
               scaleY: scrollProgress,
               transformOrigin: 'bottom'
             }}
           />
         </div>
-        <div className="text-slate-400 text-xs mt-2 text-center">
+        <div className="text-gray-500 text-xs mt-2 text-center font-mono">
           {Math.round(scrollProgress * 100)}%
         </div>
       </div>
 
       {/* Simplified Background Effects */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-950/20 to-transparent" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-slate-500/10 rounded-full blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-950/10 to-transparent" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gray-600/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gray-500/5 rounded-full blur-3xl" />
       </div>
     </div>
   );

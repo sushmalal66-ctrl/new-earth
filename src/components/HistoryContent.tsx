@@ -40,168 +40,294 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
   const periodsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   const historyPeriods: HistoryPeriod[] = [
- {
+    {
       id: 'big-bang',
-      era: 'Big Bang Era',
+      era: 'Cosmic Genesis',
       timeAgo: '13.8 Billion Years Ago',
-      title: 'Genesis of Everything',
-      subtitle: 'The Universe Ignites',
-      description: 'In a singular moment of infinite density and temperature, space and time itself began. The fundamental forces of nature separated, and the first particles formed in the cosmic soup of pure energy.',
+      title: 'The Beginning',
+      subtitle: 'Universe Emerges from Singularity',
+      description: 'In an infinitesimal moment, space and time exploded into existence. The fundamental forces separated, particles formed, and the cosmic dance began that would eventually lead to our planet.',
       keyEvents: [
         'Planck epoch - quantum gravity dominates',
-        'Inflation - exponential expansion',
-        'Nucleosynthesis - first atoms form',
-        'Cosmic microwave background emerges'
+        'Cosmic inflation expands spacetime',
+        'First particles and antiparticles form',
+        'Nucleosynthesis creates light elements'
       ],
       icon: Star,
-      color: '#64748b',
-      gradient: 'from-slate-600 via-slate-500 to-gray-600',
+      color: '#1e293b',
+      gradient: 'from-slate-800 via-slate-700 to-slate-900',
       image: 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=800&h=600&fit=crop'
     },
     {
       id: 'stellar-formation',
-      era: 'Stellar Formation',
+      era: 'Stellar Genesis',
       timeAgo: '13.6 Billion Years Ago',
-      title: 'Birth of the First Stars',
-      subtitle: 'Lighting the Dark Universe',
-      description: 'Gravity pulled together the first hydrogen and helium, forming massive stars that burned bright and fast. Their deaths in spectacular supernovae forged the heavier elements essential for planets and life.',
+      title: 'First Light',
+      subtitle: 'Stars Illuminate the Void',
+      description: 'Gravity sculpted the first massive stars from primordial hydrogen and helium. These stellar giants lived fast and died young, forging heavy elements in their nuclear cores.',
       keyEvents: [
-        'First generation stars ignite',
-        'Nuclear fusion begins element creation',
-        'Supernova explosions scatter heavy elements',
-        'Galactic structures start forming'
+        'Population III stars ignite',
+        'Nuclear fusion creates heavier elements',
+        'Supernovae seed space with metals',
+        'First galaxies begin to form'
       ],
       icon: Sparkles,
-      color: '#475569',
-      gradient: 'from-slate-700 via-blue-600 to-slate-600',
+      color: '#0f172a',
+      gradient: 'from-slate-900 via-slate-800 to-gray-900',
       image: 'https://images.unsplash.com/photo-1502134249126-9f3755a50d78?w=800&h=600&fit=crop'
     },
     {
       id: 'solar-formation',
-      era: 'Solar System Formation',
+      era: 'Solar System Birth',
       timeAgo: '4.6 Billion Years Ago',
-      title: 'Our Cosmic Neighborhood',
-      subtitle: 'From Dust to Planets',
-      description: 'Within a collapsing cloud of gas and dust, our Sun ignited. The remaining material swirled into a disk, gradually coalescing into the planets, moons, and asteroids that make up our solar system.',
+      title: 'Our Star System',
+      subtitle: 'From Nebula to Planetary System',
+      description: 'A molecular cloud collapsed under its own gravity, igniting our Sun. The remaining disk of gas and dust gradually assembled into the planets, moons, and asteroids of our solar system.',
       keyEvents: [
-        'Solar nebula collapse begins',
+        'Solar nebula gravitational collapse',
         'Protoplanetary disk formation',
-        'Planetary accretion process',
-        'Late Heavy Bombardment period'
+        'Planetary accretion begins',
+        'Late Heavy Bombardment shapes worlds'
       ],
       icon: Globe,
-      color: '#334155',
-      gradient: 'from-slate-800 via-blue-700 to-slate-700',
+      color: '#020617',
+      gradient: 'from-slate-950 via-gray-900 to-slate-900',
       image: 'https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=800&h=600&fit=crop'
     },
     {
       id: 'formation',
       era: 'Hadean Eon',
       timeAgo: '4.6 - 4.0 Billion Years Ago',
-      title: 'Earth\'s Violent Birth',
-      subtitle: 'From Molten Hell to Cooling World',
-      description: 'Earth formed from cosmic collisions, creating a molten hellscape. The Moon was born from a Mars-sized impact, and slowly our planet began to cool as water vapor condensed into the first oceans.',
+      title: 'Planetary Genesis',
+      subtitle: 'Earth Forms from Cosmic Debris',
+      description: 'Countless planetesimals collided to build our world, generating immense heat. A Mars-sized impactor created the Moon, while volcanic outgassing began forming our first atmosphere.',
       keyEvents: [
-        'Earth forms from planetesimal collisions',
-        'Moon-forming impact event',
-        'Atmospheric evolution begins',
-        'First oceans condense from vapor'
+        'Accretion creates proto-Earth',
+        'Giant impact forms the Moon',
+        'Magma ocean solidifies',
+        'Water vapor condenses into oceans'
       ],
       icon: Mountain,
-      color: '#1e293b',
-      gradient: 'from-slate-900 via-gray-800 to-slate-800',
+      color: '#0c0a09',
+      gradient: 'from-stone-950 via-slate-950 to-gray-950',
       image: 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=800&h=600&fit=crop'
     },
     {
       id: 'archean',
       era: 'Archean Eon',
       timeAgo: '4.0 - 2.5 Billion Years Ago',
-      title: 'Dawn of Life',
-      subtitle: 'First Living Cells Emerge',
-      description: 'In primordial oceans, the first life forms appeared. Simple bacteria and archaea began the long journey of evolution, setting the stage for all future biological complexity.',
+      title: 'Life Awakens',
+      subtitle: 'First Organisms Emerge',
+      description: 'In warm, shallow seas, the first self-replicating molecules evolved into primitive cells. These early microbes began photosynthesis, forever changing our planet\'s chemistry.',
       keyEvents: [
-        'First prokaryotic cells emerge',
-        'Stromatolites form in shallow seas',
-        'Photosynthesis begins to evolve',
-        'Continental crust stabilizes'
+        'RNA world gives way to DNA life',
+        'Prokaryotic cells dominate oceans',
+        'Cyanobacteria evolve photosynthesis',
+        'Stromatolites preserve ancient life'
       ],
       icon: Waves,
-      color: '#0f172a',
-      gradient: 'from-slate-950 via-blue-900 to-slate-900',
+      color: '#030712',
+      gradient: 'from-gray-950 via-slate-950 to-stone-950',
       image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&h=600&fit=crop'
     },
     {
       id: 'proterozoic',
       era: 'Proterozoic Eon',
       timeAgo: '2.5 - 0.54 Billion Years Ago',
-      title: 'The Great Oxidation',
-      subtitle: 'Oxygen Transforms Everything',
-      description: 'Cyanobacteria revolutionized Earth by producing oxygen, causing a mass extinction but enabling complex life. The first eukaryotic cells evolved, leading to multicellular organisms.',
+      title: 'Oxygen Revolution',
+      subtitle: 'Atmosphere Transforms',
+      description: 'Photosynthetic bacteria flooded the atmosphere with oxygen, triggering Earth\'s first mass extinction. This toxic gas became the foundation for complex, oxygen-breathing life.',
       keyEvents: [
-        'Great Oxidation Event occurs',
-        'First eukaryotic cells evolve',
-        'Snowball Earth glaciation periods',
-        'First multicellular life appears'
+        'Great Oxidation Event transforms atmosphere',
+        'Eukaryotic cells with nuclei evolve',
+        'Snowball Earth ice ages occur',
+        'Sexual reproduction develops'
       ],
       icon: Leaf,
-      color: '#0c0c0f',
-      gradient: 'from-slate-950 via-blue-950 to-gray-950',
+      color: '#020617',
+      gradient: 'from-slate-950 via-gray-950 to-stone-950',
       image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop'
     },
     {
       id: 'cambrian',
       era: 'Cambrian Explosion',
       timeAgo: '541 - 485 Million Years Ago',
-      title: 'Life\'s Great Experiment',
-      subtitle: 'Biodiversity Explodes',
-      description: 'In a geological instant, life exploded into countless forms. Eyes, shells, and complex body plans appeared for the first time, creating the foundation for all modern animal life.',
+      title: 'Evolutionary Explosion',
+      subtitle: 'Complex Life Emerges',
+      description: 'In just 25 million years, life exploded into incredible diversity. Eyes evolved, predators emerged, and the arms race between hunter and prey began in earnest.',
       keyEvents: [
-        'Complex eyes and vision evolve',
-        'Hard shells and exoskeletons develop',
-        'Predator-prey relationships emerge',
-        'Most modern animal phyla appear'
+        'Camera eyes evolve independently',
+        'Mineralized shells and skeletons appear',
+        'Predation drives evolutionary arms race',
+        'All major animal body plans established'
       ],
       icon: Shield,
-      color: '#080808',
-      gradient: 'from-black via-slate-900 to-gray-900',
+      color: '#0c0a09',
+      gradient: 'from-stone-950 via-slate-950 to-gray-950',
       image: 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=800&h=600&fit=crop'
+    },
+    {
+      id: 'ordovician',
+      era: 'Ordovician Period',
+      timeAgo: '485 - 444 Million Years Ago',
+      title: 'Marine Dominance',
+      subtitle: 'Seas Teem with Life',
+      description: 'Marine ecosystems reached new levels of complexity. Coral reefs flourished, cephalopods ruled as apex predators, and the first vertebrates with jaws evolved.',
+      keyEvents: [
+        'Great Ordovician Biodiversification',
+        'First coral reefs form',
+        'Nautiloid cephalopods dominate',
+        'Ordovician-Silurian extinction event'
+      ],
+      icon: Mountain,
+      color: '#030712',
+      gradient: 'from-gray-950 via-slate-950 to-stone-950',
+      image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&h=600&fit=crop'
     },
     {
       id: 'devonian',
       era: 'Devonian Period',
       timeAgo: '419 - 359 Million Years Ago',
-      title: 'Conquest of Land',
-      subtitle: 'From Sea to Shore',
-      description: 'Life made its first tentative steps onto land. Plants developed root systems and woody tissue, while the first amphibians evolved from fish, beginning the colonization of terrestrial environments.',
+      title: 'Age of Fishes',
+      subtitle: 'Life Conquers Land',
+      description: 'The first forests transformed barren landscapes while armored fish ruled the seas. Tetrapods took their first steps on land, beginning the vertebrate conquest of terrestrial environments.',
       keyEvents: [
-        'First forests appear on land',
-        'Fish develop primitive lungs',
-        'Amphibians evolve from fish',
-        'Soil ecosystems develop'
+        'First seed plants and forests evolve',
+        'Armored placoderm fish dominate',
+        'Tetrapods evolve from lobe-finned fish',
+        'Late Devonian extinction reduces diversity'
       ],
-      icon: Mountain,
-      color: '#050507',
-      gradient: 'from-black via-slate-950 to-blue-950',
+      icon: Leaf,
+      color: '#020617',
+      gradient: 'from-slate-950 via-gray-950 to-stone-950',
       image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=600&fit=crop'
     },
-  {
-  id: 'permian',
-  era: 'Permian-Triassic',
-  timeAgo: '299 - 201 Million Years Ago',
-  title: 'The Great Dying',
-  subtitle: 'Earth’s Most Severe Extinction',
-  description: 'Massive volcanic eruptions and climate shifts led to the largest extinction event in history, wiping out 90% of species. This reset life on Earth and paved the way for dinosaurs.',
-  keyEvents: [
-    'Siberian Traps volcanic eruptions',
-    '90% of species extinct',
-    'Collapse of marine ecosystems',
-    'Rise of archosaurs'
-  ],
-  icon: Zap,
-  color: '#020617',
-  gradient: 'from-slate-950 via-red-900 to-black',
-  image: 'https://images.unsplash.com/photo-1541872703-74c5e44368e6?w=800&h=600&fit=crop'
-}
+    {
+      id: 'carboniferous',
+      era: 'Carboniferous Period',
+      timeAgo: '359 - 299 Million Years Ago',
+      title: 'Coal Forest Era',
+      subtitle: 'Oxygen-Rich World',
+      description: 'Vast swamp forests covered the land, eventually forming coal deposits. High oxygen levels allowed giant insects to thrive, while the first reptiles evolved from amphibians.',
+      keyEvents: [
+        'Extensive coal swamp forests',
+        'Oxygen levels reach 35%',
+        'Giant arthropods evolve',
+        'First reptiles appear'
+      ],
+      icon: Leaf,
+      color: '#0c0a09',
+      gradient: 'from-stone-950 via-slate-950 to-gray-950',
+      image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop'
+    },
+    {
+      id: 'permian',
+      era: 'Permian-Triassic',
+      timeAgo: '299 - 201 Million Years Ago',
+      title: 'The Great Dying',
+      subtitle: 'Life\'s Greatest Crisis',
+      description: 'The Siberian Traps erupted for millions of years, triggering the most severe extinction in Earth\'s history. 96% of marine species vanished, resetting the evolutionary clock.',
+      keyEvents: [
+        'Siberian Traps flood basalt eruptions',
+        'Permian-Triassic extinction event',
+        '96% of marine species extinct',
+        'Archosaurs begin to diversify'
+      ],
+      icon: Zap,
+      color: '#030712',
+      gradient: 'from-gray-950 via-slate-950 to-stone-950',
+      image: 'https://images.unsplash.com/photo-1541872703-74c5e44368e6?w=800&h=600&fit=crop'
+    },
+    {
+      id: 'mesozoic',
+      era: 'Mesozoic Era',
+      timeAgo: '252 - 66 Million Years Ago',
+      title: 'Age of Reptiles',
+      subtitle: 'Dinosaurs Rule the Earth',
+      description: 'From the ashes of the Great Dying, dinosaurs rose to dominate land, sea, and sky. Flowering plants evolved, transforming terrestrial ecosystems and co-evolving with insects.',
+      keyEvents: [
+        'Dinosaurs diversify and dominate',
+        'First mammals appear',
+        'Flowering plants (angiosperms) evolve',
+        'Pangaea breaks apart'
+      ],
+      icon: Shield,
+      color: '#020617',
+      gradient: 'from-slate-950 via-gray-950 to-stone-950',
+      image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=600&fit=crop'
+    },
+    {
+      id: 'cretaceous-extinction',
+      era: 'K-Pg Extinction',
+      timeAgo: '66 Million Years Ago',
+      title: 'Asteroid Impact',
+      subtitle: 'End of the Dinosaur Age',
+      description: 'A 10-kilometer asteroid struck the Yucatan Peninsula, ending the reign of non-avian dinosaurs. This catastrophe opened ecological niches for mammals to diversify and eventually dominate.',
+      keyEvents: [
+        'Chicxulub asteroid impact',
+        'Global firestorms and nuclear winter',
+        'Non-avian dinosaurs extinct',
+        'Mammalian radiation begins'
+      ],
+      icon: Zap,
+      color: '#0c0a09',
+      gradient: 'from-stone-950 via-slate-950 to-gray-950',
+      image: 'https://images.unsplash.com/photo-1541872703-74c5e44368e6?w=800&h=600&fit=crop'
+    },
+    {
+      id: 'cenozoic',
+      era: 'Cenozoic Era',
+      timeAgo: '66 Million Years Ago - Present',
+      title: 'Age of Mammals',
+      subtitle: 'Rise of Modern Life',
+      description: 'Mammals rapidly diversified to fill empty ecological niches. Grasses evolved, creating new ecosystems. Climate cooled, ice ages began, and eventually, primates appeared.',
+      keyEvents: [
+        'Mammalian adaptive radiation',
+        'Grasses and grasslands evolve',
+        'Global cooling and ice ages',
+        'Primate evolution begins'
+      ],
+      icon: Users,
+      color: '#030712',
+      gradient: 'from-gray-950 via-slate-950 to-stone-950',
+      image: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=800&h=600&fit=crop'
+    },
+    {
+      id: 'human-evolution',
+      era: 'Human Evolution',
+      timeAgo: '7 Million Years Ago - Present',
+      title: 'Rise of Intelligence',
+      subtitle: 'From Apes to Civilization',
+      description: 'In Africa, apes descended from trees and began walking upright. Larger brains evolved, tools were crafted, and language developed, leading to the emergence of modern humans.',
+      keyEvents: [
+        'Bipedalism evolves in hominins',
+        'Brain size increases dramatically',
+        'Stone tool technology develops',
+        'Homo sapiens emerges in Africa'
+      ],
+      icon: Users,
+      color: '#020617',
+      gradient: 'from-slate-950 via-gray-950 to-stone-950',
+      image: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=800&h=600&fit=crop'
+    },
+    {
+      id: 'anthropocene',
+      era: 'Anthropocene',
+      timeAgo: '12,000 Years Ago - Present',
+      title: 'Human Dominance',
+      subtitle: 'Civilization Transforms Earth',
+      description: 'Agriculture enabled permanent settlements and population growth. The Industrial Revolution accelerated human impact, making our species a geological force comparable to volcanoes and glaciers.',
+      keyEvents: [
+        'Agricultural revolution begins',
+        'Cities and civilizations emerge',
+        'Industrial Revolution transforms society',
+        'Human impact rivals geological forces'
+      ],
+      icon: Globe,
+      color: '#0c0a09',
+      gradient: 'from-stone-950 via-slate-950 to-gray-950',
+      image: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=800&h=600&fit=crop'
+    }
   ];
 
   useEffect(() => {
@@ -338,12 +464,12 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
           </motion.div>
           
           <h2 className="text-6xl md:text-8xl font-bold mb-8 bg-gradient-to-r from-blue-300 via-white to-blue-100 bg-clip-text text-transparent">
-            <span className="bg-gradient-to-r from-slate-200 via-blue-200 to-slate-300 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-slate-100 via-gray-200 to-slate-300 bg-clip-text text-transparent">
               Earth's Epic Story
             </span>
           </h2>
           
-          <p className="text-xl md:text-2xl text-slate-300 max-w-4xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-gray-400 max-w-4xl mx-auto leading-relaxed">
             Witness the incredible transformation of our planet through 4.6 billion years 
             of evolution, from a molten ball of rock to the vibrant world we call home
           </p>
@@ -370,48 +496,48 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
                 <div className="flex-1 space-y-8">
                   {/* Era Badge */}
                   <motion.div
-                    className={`inline-flex items-center px-6 py-3 bg-gradient-to-r ${period.gradient} rounded-full shadow-lg`}
+                    className={`inline-flex items-center px-6 py-3 bg-gradient-to-r ${period.gradient} rounded-full shadow-lg border border-gray-700/30`}
                     whileHover={{ scale: 1.05 }}
                   >
-                    <IconComponent className="w-5 h-5 text-white mr-3" />
-                    <span className="text-slate-100 font-semibold">{period.era}</span>
+                    <IconComponent className="w-5 h-5 text-gray-100 mr-3" />
+                    <span className="text-gray-100 font-semibold">{period.era}</span>
                   </motion.div>
 
                   {/* Time Indicator */}
-                  <div className="text-slate-400 text-lg font-medium">
+                  <div className="text-gray-500 text-lg font-medium">
                     {period.timeAgo}
                   </div>
 
                   {/* Title */}
                   <div>
-                    <h3 className="text-4xl md:text-5xl font-bold text-slate-100 mb-4 leading-tight">
+                    <h3 className="text-4xl md:text-5xl font-bold text-gray-100 mb-4 leading-tight">
                       {period.title}
                     </h3>
-                    <h4 className="text-xl md:text-2xl text-slate-300 font-medium mb-6">
+                    <h4 className="text-xl md:text-2xl text-gray-300 font-medium mb-6">
                       {period.subtitle}
                     </h4>
                   </div>
 
                   {/* Description */}
-                  <p className="text-lg text-slate-300 leading-relaxed max-w-2xl">
+                  <p className="text-lg text-gray-300 leading-relaxed max-w-2xl">
                     {period.description}
                   </p>
 
                   {/* Key Events */}
                   <div className="space-y-4">
-                    <h5 className="text-lg font-semibold text-slate-100 flex items-center">
-                      <Sparkles className="w-5 h-5 mr-2 text-slate-400" />
+                    <h5 className="text-lg font-semibold text-gray-100 flex items-center">
+                      <Sparkles className="w-5 h-5 mr-2 text-gray-400" />
                       Key Developments
                     </h5>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {period.keyEvents.map((event, eventIndex) => (
                         <motion.div
                           key={eventIndex}
-                          className="flex items-start space-x-3 p-4 bg-slate-900/30 backdrop-blur-sm border border-slate-700/20 rounded-xl hover:border-slate-500/40 transition-all duration-300"
+                          className="flex items-start space-x-3 p-4 bg-gray-900/40 backdrop-blur-sm border border-gray-800/30 rounded-xl hover:border-gray-600/50 transition-all duration-300"
                           whileHover={{ scale: 1.02, x: 5 }}
                         >
                           <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${period.gradient} mt-2 flex-shrink-0`} />
-                          <span className="text-slate-400 text-sm leading-relaxed">{event}</span>
+                          <span className="text-gray-400 text-sm leading-relaxed">{event}</span>
                         </motion.div>
                       ))}
                     </div>
@@ -419,7 +545,7 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
 
                   {/* Learn More Button */}
                   <motion.button
-                    className={`inline-flex items-center px-8 py-4 bg-gradient-to-r ${period.gradient} hover:shadow-lg text-slate-100 font-semibold rounded-xl transition-all duration-300`}
+                    className={`inline-flex items-center px-8 py-4 bg-gradient-to-r ${period.gradient} hover:shadow-lg text-gray-100 font-semibold rounded-xl transition-all duration-300 border border-gray-700/20`}
                     whileHover={{ scale: 1.05, x: 5 }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -456,23 +582,23 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
                     </div>
 
                     {/* Decorative Elements */}
-                    <div className="absolute -top-4 -left-4 w-24 h-24 bg-blue-500/10 rounded-full blur-xl" />
-                    <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-purple-500/10 rounded-full blur-xl" />
+                    <div className="absolute -top-4 -left-4 w-24 h-24 bg-gray-500/10 rounded-full blur-xl" />
+                    <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-gray-600/10 rounded-full blur-xl" />
                     
                     {/* Stats Overlay */}
                     <motion.div 
-                      className="absolute bottom-6 left-6 right-6 bg-black/60 backdrop-blur-md border border-white/10 rounded-2xl p-6"
+                      className="absolute bottom-6 left-6 right-6 bg-black/70 backdrop-blur-md border border-gray-700/20 rounded-2xl p-6"
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3 }}
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-white font-semibold text-lg">{period.era}</div>
-                          <div className="text-blue-200/70 text-sm">{period.timeAgo}</div>
+                          <div className="text-gray-100 font-semibold text-lg">{period.era}</div>
+                          <div className="text-gray-400 text-sm">{period.timeAgo}</div>
                         </div>
                         <div className={`w-12 h-12 bg-gradient-to-r ${period.gradient} rounded-xl flex items-center justify-center`}>
-                          <IconComponent className="w-6 h-6 text-white" />
+                          <IconComponent className="w-6 h-6 text-gray-100" />
                         </div>
                       </div>
                     </motion.div>
@@ -485,22 +611,22 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
 
         {/* Section Footer */}
         <motion.div 
-          className="text-center mt-32 pt-16 border-t border-slate-700/30"
+          className="text-center mt-32 pt-16 border-t border-gray-800/30"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
           viewport={{ once: true }}
         >
-          <h3 className="text-3xl md:text-4xl font-bold text-slate-100 mb-6">
+          <h3 className="text-3xl md:text-4xl font-bold text-gray-100 mb-6">
             The Story Continues
           </h3>
-          <p className="text-lg text-slate-300 max-w-2xl mx-auto mb-8">
+          <p className="text-lg text-gray-300 max-w-2xl mx-auto mb-8">
             Earth's journey is far from over. Every day brings new discoveries, 
             challenges, and opportunities to shape our planet's future.
           </p>
           
           <motion.button
-            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-slate-600 to-blue-600 hover:from-slate-500 hover:to-blue-500 text-slate-100 font-semibold rounded-xl shadow-lg transition-all duration-300"
+            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600 text-gray-100 font-semibold rounded-xl shadow-lg transition-all duration-300 border border-gray-700/30"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -516,7 +642,7 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
         {[...Array(15)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 bg-slate-400/30 rounded-full"
+            className="absolute w-2 h-2 bg-gray-500/20 rounded-full"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,

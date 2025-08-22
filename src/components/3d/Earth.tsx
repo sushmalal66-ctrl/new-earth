@@ -354,41 +354,42 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
     const time = state.clock.elapsedTime;
     const progress = earthProgress.get();
     
-    // ENHANCED SPINNING - Much more noticeable rotation
-    const baseSpeed = 0.8; // Increased from 0.3
-    const progressMultiplier = 1 + progress * 3; // More dramatic speed increase
+    // CONTINUOUS SPINNING - Always rotating regardless of scroll
+    const baseSpeed = 0.4; // Steady rotation speed
+    const progressMultiplier = 1 + progress * 1.5; // Moderate speed increase with scroll
     
-    // Main Earth spinning - continuous and smooth
+    // Main Earth spinning - ALWAYS rotating
     meshRef.current.rotation.y = time * baseSpeed * progressMultiplier;
+    meshRef.current.rotation.x = Math.sin(time * 0.1) * 0.05; // Subtle wobble
     
-    // Clouds rotate faster and in opposite direction for dynamic effect
+    // Clouds rotate independently for dynamic layering
     if (cloudsRef.current) {
-      cloudsRef.current.rotation.y = -time * 1.2 * progressMultiplier;
-      cloudsRef.current.rotation.x = Math.sin(time * 0.3) * 0.1;
+      cloudsRef.current.rotation.y = time * 0.6 * progressMultiplier; // Same direction, different speed
+      cloudsRef.current.rotation.z = Math.sin(time * 0.2) * 0.03;
     }
     
-    // Atmosphere spins slower but with pulsing
+    // Atmosphere rotates with subtle variations
     if (atmosphereRef.current) {
-      atmosphereRef.current.rotation.y = time * 0.6 * progressMultiplier;
-      atmosphereRef.current.rotation.z = Math.sin(time * 0.5) * 0.05;
+      atmosphereRef.current.rotation.y = time * 0.3 * progressMultiplier;
+      atmosphereRef.current.rotation.x = Math.cos(time * 0.15) * 0.02;
     }
     
-    // Add complex rotation on multiple axes for more dynamic movement
-    groupRef.current.rotation.x = Math.sin(time * 0.2) * 0.1;
-    groupRef.current.rotation.z = Math.cos(time * 0.25) * 0.08;
+    // Subtle orbital movement for the entire group
+    groupRef.current.rotation.x = Math.sin(time * 0.1) * 0.03;
+    groupRef.current.rotation.z = Math.cos(time * 0.12) * 0.02;
     
-    // Enhanced scaling and positioning based on progress
-    const scale = 1.0 + progress * 0.4;
-    const pulse = Math.sin(time * 2) * 0.02 + 1;
+    // Gentle scaling and floating animation
+    const scale = 1.0 + progress * 0.2;
+    const pulse = Math.sin(time * 1.5) * 0.01 + 1;
     groupRef.current.scale.setScalar(scale * pulse);
     
-    // More dramatic floating animation
-    groupRef.current.position.y = Math.sin(time * 0.4) * 0.1 + Math.cos(time * 0.6) * 0.05;
-    groupRef.current.position.x = Math.sin(time * 0.3) * 0.03;
+    // Gentle floating motion
+    groupRef.current.position.y = Math.sin(time * 0.3) * 0.05 + Math.cos(time * 0.4) * 0.02;
+    groupRef.current.position.x = Math.sin(time * 0.25) * 0.02;
     
-    // Dynamic camera positioning
-    const cameraDistance = 5 - progress * 2;
-    state.camera.position.z = cameraDistance + Math.sin(time * 0.1) * 0.2;
+    // Subtle camera movement for cinematic effect
+    const cameraDistance = 5 - progress * 1;
+    state.camera.position.z = cameraDistance + Math.sin(time * 0.08) * 0.1;
     
     // Update shader uniforms
     earthMaterial.uniforms.time.value = time;
@@ -403,7 +404,7 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
     cloudsMaterial.uniforms.progress.value = progress;
     
     // Dynamic sun direction with more movement
-    const sunAngle = progress * Math.PI + time * 0.1;
+    const sunAngle = progress * Math.PI + time * 0.05;
     earthMaterial.uniforms.sunDirection.value.set(
       Math.cos(sunAngle),
       Math.sin(sunAngle * 0.7) * 0.8,

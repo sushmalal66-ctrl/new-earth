@@ -113,9 +113,9 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
         time: { value: 0 },
         scrollProgress: { value: 0 },
         sunDirection: { value: new THREE.Vector3(1, 0.5, 0.5) },
-        atmosphereColor: { value: new THREE.Color(0x94a3b8) },
+        atmosphereColor: { value: new THREE.Color(0x6b7280) },
         cloudTransition: { value: 0 },
-        cinematicTint: { value: new THREE.Color(0x64748b) },
+        cinematicTint: { value: new THREE.Color(0x4b5563) },
         performanceLevel: { value: performanceLevel === 'high' ? 1.0 : performanceLevel === 'medium' ? 0.5 : 0.0 }
       },
       vertexShader: `
@@ -220,7 +220,7 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
         time: { value: 0 },
         scrollProgress: { value: 0 },
         opacity: { value: 0.2 },
-        color: { value: new THREE.Color(0x94a3b8) }
+        color: { value: new THREE.Color(0x6b7280) }
       },
       vertexShader: `
         varying vec3 vNormal;
@@ -267,7 +267,7 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
       uniforms: {
         time: { value: 0 },
         scrollProgress: { value: 0 },
-        glowColor: { value: new THREE.Color(0x64748b) }
+        glowColor: { value: new THREE.Color(0x4b5563) }
       },
       vertexShader: `
         varying vec3 vNormal;
@@ -410,13 +410,13 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
   return (
     <group ref={groupRef}>
       {/* Optimized Lighting Setup */}
-      <ambientLight intensity={0.25} color="#f1f5f9" />
+      <ambientLight intensity={0.2} color="#e5e7eb" />
       
       {/* Main directional light (sun) */}
       <directionalLight 
         position={[10, 5, 5]} 
-        intensity={1.8}
-        color="#e2e8f0"
+        intensity={1.5}
+        color="#d1d5db"
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -431,14 +431,14 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
       <directionalLight 
         position={[-8, -3, -5]} 
         intensity={0.4}
-        color="#64748b"
+        color="#6b7280"
       />
       
       {/* Rim light for atmosphere */}
       <pointLight 
         position={[0, 0, 8]} 
         intensity={0.8}
-        color="#94a3b8"
+        color="#9ca3af"
         distance={25}
         decay={2}
       />
@@ -463,7 +463,7 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
         <>
           <mesh geometry={getOptimizedGeometry('glow1', [1.15, 16, 8])}>
         <meshBasicMaterial 
-          color="#64748b"
+          color="#6b7280"
           transparent
           opacity={0.025}
           side={THREE.BackSide}
@@ -472,7 +472,7 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
       
           <mesh geometry={getOptimizedGeometry('glow2', [1.25, 12, 6])}>
         <meshBasicMaterial 
-          color="#94a3b8"
+          color="#9ca3af"
           transparent
           opacity={0.015}
           side={THREE.BackSide}
