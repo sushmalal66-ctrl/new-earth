@@ -281,11 +281,7 @@ const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
         duration: 4,
         ease: "power2.inOut",
         repeat: -1,
-        yoyo: true,
-        stagger: 0.3,
-        force3D: true
-      });
-    });
+  }, []);
 
     return () => {
       ctx.revert();
