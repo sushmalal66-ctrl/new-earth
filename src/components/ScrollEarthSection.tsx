@@ -61,6 +61,7 @@ const ScrollEarthSection: React.FC = () => {
           canvasRef.current.style.willChange = 'transform, opacity';
           canvasRef.current.style.opacity = opacity.toString();
         }
+  }, [isInCloudTransition, cloudOpacity, contentOpacity]);
 
   // Lenis scroll handler - single source of truth
   const lenis = useLenis(({ scroll, limit }) => {
