@@ -16,10 +16,10 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
   
   // Load textures
   const [dayTexture, nightTexture, cloudsTexture, normalTexture] = useLoader(TextureLoader, [
-    'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=2048&h=1024&fit=crop&crop=center',
-    'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=2048&h=1024&fit=crop&crop=center',
-    'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=2048&h=1024&fit=crop&crop=center&blend=multiply&sat=-100&bri=50',
-    'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=1024&h=512&fit=crop&crop=center&sat=-100&bri=50'
+    'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=2048&h=1024&fit=crop',
+    'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=2048&h=1024&fit=crop',
+    'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=2048&h=1024&fit=crop',
+    'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=1024&h=512&fit=crop'
   ]);
 
   // Configure textures
