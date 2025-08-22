@@ -1,7 +1,8 @@
-import React, { useRef, useMemo, useImperativeHandle, forwardRef, useCallback } from 'react';
+import React, { useRef, useMemo, useImperativeHandle, forwardRef, useCallback,useEffect } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import { Sphere } from '@react-three/drei';
 import * as THREE from 'three';
+
 
 interface ScrollEarthProps {
   scrollProgress: number;
@@ -89,6 +90,20 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
       materialCache.current.forEach(material => material.dispose());
     };
   }, []);
+
+  // Define sphere geometry arguments based on performance level
+  const sphereArgs = useMemo((): [number, number, number] => {
+    switch (performanceLevel) {
+      case 'high':
+        return [1, 64, 32];
+      case 'medium':
+        return [1, 32, 16];
+      case 'low':
+        return [1, 16, 8];
+      default:
+        return [1, 32, 16];
+    }
+  }, [performanceLevel]);
 
   // Enhanced Earth material with scroll-responsive effects
   const earthMaterial = useMemo(() => {

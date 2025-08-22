@@ -53,7 +53,6 @@ const ScrollEarthSection: React.FC = () => {
     // Use motion value instead of direct DOM manipulation
     const opacity = Math.max(0.7, 1 - progress * 0.3);
     canvasOpacity.set(opacity);
-    }
 
     // Direct canvas transformations (no GSAP conflicts)
     // Keep canvas fixed and let Three.js handle positioning
@@ -63,7 +62,7 @@ const ScrollEarthSection: React.FC = () => {
       canvasRef.current.style.opacity = opacity.toString();
       canvasRef.current.style.transform = 'none'; // Remove conflicting transforms
     }
-  }, [isInCloudTransition, cloudOpacity, contentOpacity]);
+  }, [isInCloudTransition, cloudOpacity, contentOpacity, canvasOpacity]);
 
   // Lenis scroll handler - single source of truth
   const lenis = useLenis(({ scroll, limit }) => {
