@@ -12,8 +12,7 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   const [hasMovedForward, setHasMovedForward] = useState(false);
-  const [targetZ, setTargetZ] = useState(0);
-  const [currentZ, setCurrentZ] = useState(0);
+  const baseRotationSpeed = 0.5;
   
   // Load Earth texture with fallback
   let earthTexture;
@@ -51,12 +50,11 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
     }
   }, [earthTexture]);
 
-  // Scroll detection - move forward only once
+  // Scroll detection for initial forward movement
   useEffect(() => {
     const handleScroll = () => {
       if (!hasMovedForward) {
         setHasMovedForward(true);
-        setTargetZ(1.2); // Move 20% closer (from 0 to 1.2 units forward)
       }
     };
 
@@ -69,16 +67,20 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
     if (!meshRef.current || !groupRef.current) return;
     
     const time = state.clock.elapsedTime;
+    const progress = earthProgress.get();
     
-    // Continuous rotation on Y-axis (vertical axis)
-    meshRef.current.rotation.y = time * 0.5; // Smooth, consistent rotation
+    // Continuous rotation on Y-axis, synced with timeline progress
+    const rotationSpeed = baseRotationSpeed + (progress * 0.3); // Slightly faster as timeline progresses
+    meshRef.current.rotation.y = time * rotationSpeed;
     
-    // Smooth forward movement when triggered
-    if (currentZ < targetZ) {
-      const newZ = THREE.MathUtils.lerp(currentZ, targetZ, 0.02);
-      setCurrentZ(newZ);
-      groupRef.current.position.z = newZ;
-    }
+    // Forward movement based on scroll + subtle timeline-based positioning
+    const baseZ = hasMovedForward ? 1.2 : 0;
+    const timelineZ = progress * 0.3; // Additional subtle movement with timeline
+    groupRef.current.position.z = baseZ + timelineZ;
+    
+    // Subtle rotation variations based on timeline progress
+    groupRef.current.rotation.x = Math.sin(progress * Math.PI) * 0.05;
+    groupRef.current.rotation.z = Math.cos(progress * Math.PI * 0.5) * 0.02;
   });
 
   return (

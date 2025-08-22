@@ -2,10 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { motion } from 'framer-motion';
 import Scene from '../components/3d/Scene';
-import Section from '../components/ui/Section';
-import HistoryContent from '../components/HistoryContent';
+import HorizontalTimelineSection from '../components/ui/HorizontalTimelineSection';
 import { useLenisGsapSync } from '../hooks/useLenisGsapSync';
-import { initializeTimelines } from '../animations/timelines';
+import { initializeHorizontalTimeline } from '../animations/horizontalTimeline';
 import { sections } from '../data/sections';
 
 const Home: React.FC = () => {
@@ -15,7 +14,7 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     if (containerRef.current) {
-      initializeTimelines(containerRef.current);
+      initializeHorizontalTimeline(containerRef.current);
     }
   }, []);
 
@@ -37,37 +36,23 @@ const Home: React.FC = () => {
           }}
           dpr={[1, 2]}
           shadows={false}
-
           performance={{ min: 0.5 }}
         >
           <Scene earthProgress={earthProgress} />
         </Canvas>
       </div>
 
-      {/* Scrollable Content */}
+      {/* Horizontal Timeline Container */}
       <div className="relative z-20">
-        {/* Hero Section */}
-        <Section
-          key={sections[0].id}
-          {...sections[0]}
-          index={0}
-          isFirst={true}
-          isLast={false}
-        />
-        
-        {/* History Content Component */}
-        <HistoryContent scrollProgress={scrollProgress.get()} />
-        
-        {/* Remaining sections */}
-        {sections.slice(1).map((section, index) => (
-          <Section
-            key={section.id}
-            {...section}
-            index={index + 1}
-            isFirst={false}
-            isLast={index === sections.length - 2}
-          />
-        ))}
+        <div className="horizontal-timeline">
+          {sections.map((section, index) => (
+            <HorizontalTimelineSection
+              key={section.id}
+              {...section}
+              index={index}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Scroll Progress Indicator */}
@@ -91,6 +76,21 @@ const Home: React.FC = () => {
         </div>
       </motion.div>
 
+      {/* Timeline Navigation */}
+      <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-30">
+        <div className="flex space-x-2 bg-black/40 backdrop-blur-sm border border-cyan-500/30 rounded-full px-4 py-2">
+          {sections.map((_, index) => (
+            <button
+              key={index}
+              className="w-3 h-3 rounded-full bg-slate-600 hover:bg-cyan-400 transition-colors duration-300"
+              onClick={() => {
+                const targetScroll = (index / (sections.length - 1)) * (sections.length * window.innerWidth);
+                scrollTo(targetScroll);
+              }}
+            />
+          ))}
+        </div>
+      </div>
       {/* Background Effects */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-gradient-to-b from-slate-900/20 via-transparent to-slate-900/20" />

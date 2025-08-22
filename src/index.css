@@ -21,6 +21,8 @@
 html {
   scroll-behavior: auto; /* Let Lenis handle smooth scrolling */
   overflow-x: hidden;
+  /* Ensure horizontal timeline works properly */
+  height: 100%;
 }
 
 body {
@@ -33,6 +35,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   background: linear-gradient(135deg, #000000 0%, #111827 50%, #1f2937 100%);
+  /* Ensure proper height for horizontal scrolling */
+  height: 100%;
+  min-height: 100vh;
 }
 
 /* Performance optimizations */
@@ -40,6 +45,27 @@ body {
   will-change: auto;
 }
 
+/* Horizontal Timeline Specific Styles */
+.horizontal-timeline {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.timeline-section {
+  will-change: transform;
+  contain: layout style paint;
+}
+
+/* Typing Animation Cursor Styling */
+.react-type-animation-cursor {
+  color: #00ffff !important;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
 .gpu-accelerated {
   transform: translateZ(0);
   will-change: transform;
