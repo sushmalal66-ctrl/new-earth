@@ -54,13 +54,13 @@ const ScrollEarthSection: React.FC = () => {
         // Subtle Y movement to keep Earth in view
         const y = -progress * 150;
         // Maintain good visibility throughout scroll
-        const opacity = Math.max(0.4, 1 - progress * 0.6);
-      const opacity = Math.max(0.3, 1 - progress * 0.7);
+        const opacity = Math.max(0.3, 1 - progress * 0.7);
         // Apply GPU-accelerated transforms
-        canvasRef.current.style.transform = `scale3d(${scale}, ${scale}, 1) translate3d(0, ${y}px, 0)`;
-      canvasRef.current.style.transform = `scale(${scale}) translateY(${y}px)`;
-        canvasRef.current.style.willChange = 'transform, opacity';
-      canvasRef.current.style.opacity = opacity.toString();
+        if (canvasRef.current) {
+          canvasRef.current.style.transform = `scale3d(${scale}, ${scale}, 1) translate3d(0, ${y}px, 0)`;
+          canvasRef.current.style.willChange = 'transform, opacity';
+          canvasRef.current.style.opacity = opacity.toString();
+        }
     }
   }, [isInCloudTransition, cloudOpacity, contentOpacity]);
 
