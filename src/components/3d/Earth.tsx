@@ -86,15 +86,45 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
     return texture;
   }, []);
 
+  // Create a simple normal texture procedurally
+  const normalTexture = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      // Create a neutral normal map (pointing up)
+      ctx.fillStyle = '#8080ff';
+      ctx.fillRect(0, 0, 512, 256);
+      
+      // Add some subtle variations
+      ctx.globalAlpha = 0.1;
+      for (let i = 0; i < 200; i++) {
+        const x = Math.random() * 512;
+        const y = Math.random() * 256;
+        const size = Math.random() * 10 + 2;
+        ctx.fillStyle = Math.random() > 0.5 ? '#9090ff' : '#7070ff';
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    return texture;
+  }, []);
+
   // Configure all textures
   useMemo(() => {
-    [earthTexture, nightTexture, cloudsTexture].forEach(texture => {
+    [earthTexture, nightTexture, cloudsTexture, normalTexture].forEach(texture => {
       texture.wrapS = THREE.RepeatWrapping;
       texture.wrapT = THREE.RepeatWrapping;
       texture.anisotropy = 16;
       texture.generateMipmaps = true;
     });
-  }, [earthTexture, nightTexture, cloudsTexture]);
+  }, [earthTexture, nightTexture, cloudsTexture, normalTexture]);
 
   // Earth material with shader
   const earthMaterial = useMemo(() => {
@@ -107,7 +137,7 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
         time: { value: 0 },
         progress: { value: 0 },
         atmosphereColor: { value: new THREE.Color(0x87ceeb) }
-      }
+      },
       vertexShader: `
         varying vec2 vUv;
         varying vec3 vNormal;
@@ -174,7 +204,7 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
         }
       `
     });
-  }, [earthTexture, nightTexture]);
+  }, [earthTexture, nightTexture, normalTexture]);
 
   // Atmosphere material
   const atmosphereMaterial = useMemo(() => {
