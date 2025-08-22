@@ -185,6 +185,18 @@ canvas {
   outline: none;
   image-rendering: auto;
   touch-action: none;
+  /* GPU acceleration for smooth transforms */
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Optimized canvas container */
+.canvas-container {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  contain: layout style paint;
 }
 
 /* Prevent text selection on UI elements */
