@@ -37,7 +37,7 @@ const Home: React.FC = () => {
           }}
           dpr={[1, 2]}
           shadows={false}
-          frameloop="demand"
+
           performance={{ min: 0.5 }}
         >
           <Scene earthProgress={earthProgress} />
