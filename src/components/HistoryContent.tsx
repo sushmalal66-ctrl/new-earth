@@ -577,7 +577,7 @@ const HistoryContent: React.FC<HistoryContentProps> = ({ scrollProgress }) => {
                       />
                       
                       {/* Image Overlay */}
-                      <div className={`absolute inset-0 bg-gradient-to-t ${period.gradient} opacity-20 group-hover:opacity-30 transition-opacity duration-500`} />
+                      <div className={`absolute inset-0 bg-gradient-to-t ${period.gradient} opacity-100 group-hover:opacity-90 transition-opacity duration-500`} />
                       
                       {/* Floating Icon */}
                       <div className="absolute top-6 right-6">
