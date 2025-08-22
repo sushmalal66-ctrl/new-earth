@@ -49,18 +49,13 @@ const ScrollEarthSection: React.FC = () => {
     }
 
     // Direct canvas transformations (no GSAP conflicts)
-        // Smooth scale transition for cinematic effect
-        const scale = 1 + progress * 3.5;
-        // Subtle Y movement to keep Earth in view
-        const y = -progress * 150;
-        // Maintain good visibility throughout scroll
-        const opacity = Math.max(0.3, 1 - progress * 0.7);
-        // Apply GPU-accelerated transforms
-        if (canvasRef.current) {
-          canvasRef.current.style.transform = `scale3d(${scale}, ${scale}, 1) translate3d(0, ${y}px, 0)`;
-          canvasRef.current.style.willChange = 'transform, opacity';
-          canvasRef.current.style.opacity = opacity.toString();
-        }
+    // Keep canvas fixed and let Three.js handle positioning
+    if (canvasRef.current) {
+      // Only apply minimal opacity changes
+      const opacity = Math.max(0.7, 1 - progress * 0.3);
+      canvasRef.current.style.opacity = opacity.toString();
+      canvasRef.current.style.transform = 'none'; // Remove conflicting transforms
+    }
   }, [isInCloudTransition, cloudOpacity, contentOpacity]);
 
   // Lenis scroll handler - single source of truth
@@ -84,10 +79,10 @@ const ScrollEarthSection: React.FC = () => {
         {/* Fixed 3D Earth Canvas */}
         <div 
           ref={canvasRef}
-          className="fixed inset-0 z-10 pointer-events-none will-change-transform"
+          className="fixed inset-0 z-10 pointer-events-none"
         >
           <Canvas
-            camera={{ position: [0, 0, 5], fov: 50 }}
+            camera={{ position: [0, 0, 5], fov: 45 }}
             gl={{ 
               antialias: true, 
               alpha: true,

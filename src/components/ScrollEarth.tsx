@@ -29,14 +29,14 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
   // Scroll following configuration
   const scrollConfig = {
     // Distance bounds (camera distance units)
-    minDistance: 3.5,
-    maxDistance: 8.0,
+    minDistance: 4.0,
+    maxDistance: 6.0,
     // Y position bounds (world units)
-    minY: -2.0,
-    maxY: 2.0,
+    minY: -0.5,
+    maxY: 0.5,
     // Smooth following parameters
-    followSpeed: 0.08,
-    easingFactor: 0.12
+    followSpeed: 0.05,
+    easingFactor: 0.08
   };
 
   // Rotation configuration
@@ -238,19 +238,9 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
 
   // Calculate optimal position based on scroll progress
   const calculateScrollPosition = useCallback((progress: number) => {
-    // Map scroll progress to camera distance (closer when scrolling)
-    const targetDistance = THREE.MathUtils.lerp(
-      scrollConfig.maxDistance, 
-      scrollConfig.minDistance, 
-      easeOutCubic(progress)
-    );
-    
-    // Map scroll progress to Y position (moves up slightly when scrolling)
-    const targetY = THREE.MathUtils.lerp(
-      scrollConfig.minY,
-      scrollConfig.maxY,
-      easeOutCubic(progress * 0.7) // Less dramatic Y movement
-    );
+    // Keep Earth more centered with minimal movement
+    const targetDistance = scrollConfig.minDistance + (scrollConfig.maxDistance - scrollConfig.minDistance) * (1 - progress * 0.3);
+    const targetY = scrollConfig.minY + (scrollConfig.maxY - scrollConfig.minY) * progress * 0.2;
     
     return { distance: targetDistance, y: targetY };
   }, [easeOutCubic]);
@@ -290,7 +280,7 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
     
     // Smooth position interpolation using lerp
     const currentY = groupRef.current.position.y;
-    const targetY = scrollPosition.y + Math.sin(currentTime * 0.2) * 0.008; // Subtle floating
+    const targetY = scrollPosition.y + Math.sin(currentTime * 0.2) * 0.003; // Reduced floating
     
     groupRef.current.position.y = THREE.MathUtils.lerp(
       currentY,
@@ -298,15 +288,9 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
       scrollConfig.followSpeed
     );
     
-    // Smooth scale interpolation for distance effect
+    // Keep scale more stable
     const currentScale = groupRef.current.scale.x;
-    const targetScale = THREE.MathUtils.mapLinear(
-      scrollPosition.distance,
-      scrollConfig.minDistance,
-      scrollConfig.maxDistance,
-      1.4, // Closer = larger
-      0.8  // Further = smaller
-    );
+    const targetScale = 1.0 + progress * 0.2; // Subtle scale increase
     
     const newScale = THREE.MathUtils.lerp(
       currentScale,
