@@ -31,9 +31,6 @@ const Scene: React.FC<SceneProps> = ({ earthProgress }) => {
         distance={20}
       />
 
-      {/* Environment */}
-      <Environment preset="night" />
-      
       {/* Sparse Star Field */}
       <Stars 
         radius={100} 
