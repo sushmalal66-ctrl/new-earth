@@ -1,7 +1,5 @@
 import React, { useRef, useMemo } from 'react';
 import { motion, MotionValue } from 'framer-motion';
-import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
 
 interface CloudTransitionProps {
   opacity: MotionValue<number>;
@@ -11,30 +9,30 @@ interface CloudTransitionProps {
 const CloudTransition: React.FC<CloudTransitionProps> = ({ opacity, isActive }) => {
   const cloudsRef = useRef<HTMLDivElement>(null);
 
-  // Generate cloud layers
+  // Reduced cloud layers for better performance
   const cloudLayers = useMemo(() => {
-    return Array.from({ length: 8 }, (_, i) => ({
+    return Array.from({ length: 4 }, (_, i) => ({
       id: i,
-      size: 200 + i * 100,
+      size: 150 + i * 80,
       left: Math.random() * 100,
       top: Math.random() * 100,
-      animationDelay: i * 0.5,
-      opacity: 0.1 + (i * 0.05),
-      blur: 20 + i * 10
+      animationDelay: i * 0.8,
+      opacity: 0.08 + (i * 0.03),
+      blur: 15 + i * 8
     }));
   }, []);
 
   return (
     <motion.div
       ref={cloudsRef}
-      className="fixed inset-0 z-15 pointer-events-none"
+      className="fixed inset-0 z-15 pointer-events-none will-change-transform"
       style={{ opacity }}
     >
-      {/* Cloud Layers */}
+      {/* Reduced Cloud Layers */}
       {cloudLayers.map((cloud) => (
         <motion.div
           key={cloud.id}
-          className="cloud-layer absolute rounded-full bg-gradient-to-br from-slate-200/15 to-blue-200/8"
+          className="cloud-layer absolute rounded-full bg-gradient-to-br from-slate-200/10 to-blue-200/5"
           style={{
             width: `${cloud.size}px`,
             height: `${cloud.size}px`,
@@ -44,12 +42,12 @@ const CloudTransition: React.FC<CloudTransitionProps> = ({ opacity, isActive }) 
             opacity: cloud.opacity,
           }}
           animate={isActive ? {
-            scale: [1, 1.2, 1],
-            x: [0, 20, 0],
-            y: [0, -10, 0],
+            scale: [1, 1.1, 1],
+            x: [0, 15, 0],
+            y: [0, -8, 0],
           } : {}}
           transition={{
-            duration: 8 + cloud.animationDelay,
+            duration: 6 + cloud.animationDelay,
             repeat: Infinity,
             ease: "easeInOut",
             delay: cloud.animationDelay
@@ -57,39 +55,39 @@ const CloudTransition: React.FC<CloudTransitionProps> = ({ opacity, isActive }) 
         />
       ))}
 
-      {/* Particle Effects */}
+      {/* Reduced Particle Effects */}
       <div className="absolute inset-0">
-        {Array.from({ length: 30 }).map((_, i) => (
+        {Array.from({ length: 15 }).map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-1 h-1 bg-slate-300/40 rounded-full"
+            className="absolute w-0.5 h-0.5 bg-slate-300/30 rounded-full"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
             }}
             animate={isActive ? {
-              y: [0, -50, 0],
-              opacity: [0.3, 0.8, 0.3],
-              scale: [0.5, 1, 0.5],
+              y: [0, -30, 0],
+              opacity: [0.2, 0.6, 0.2],
+              scale: [0.3, 0.8, 0.3],
             } : {}}
             transition={{
-              duration: 3 + Math.random() * 2,
+              duration: 2.5 + Math.random() * 1.5,
               repeat: Infinity,
-              delay: Math.random() * 2,
+              delay: Math.random() * 1.5,
             }}
           />
         ))}
       </div>
 
-      {/* Atmospheric Glow */}
+      {/* Simplified Atmospheric Glow */}
       <motion.div
-        className="absolute inset-0 bg-gradient-radial from-slate-400/8 via-transparent to-transparent"
+        className="absolute inset-0 bg-gradient-radial from-slate-400/5 via-transparent to-transparent"
         animate={isActive ? {
-          scale: [1, 1.5, 1],
-          opacity: [0.3, 0.6, 0.3],
+          scale: [1, 1.3, 1],
+          opacity: [0.2, 0.4, 0.2],
         } : {}}
         transition={{
-          duration: 6,
+          duration: 4,
           repeat: Infinity,
           ease: "easeInOut"
         }}

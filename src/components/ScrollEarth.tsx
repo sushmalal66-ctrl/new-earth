@@ -1,12 +1,11 @@
 import React, { useRef, useMemo, useImperativeHandle, forwardRef } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import { Sphere } from '@react-three/drei';
-import { MotionValue } from 'framer-motion';
 import * as THREE from 'three';
 
 interface ScrollEarthProps {
   scrollProgress: number;
-  isInCloudTransition: boolean; // Keep this for shader uniform
+  isInCloudTransition: boolean;
 }
 
 interface ScrollEarthRef {
@@ -22,8 +21,9 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
   const glowRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   const scrollProgressRef = useRef(0);
+  const lastUpdateTime = useRef(0);
 
-  // Load Earth texture from assets
+  // Load Earth texture
   const earthTexture = useLoader(THREE.TextureLoader, '/assets/earth.jpg');
   
   // Configure texture for optimal quality
@@ -46,9 +46,9 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
         time: { value: 0 },
         scrollProgress: { value: 0 },
         sunDirection: { value: new THREE.Vector3(1, 0.5, 0.5) },
-        atmosphereColor: { value: new THREE.Color(0x94a3b8) }, // Slate-400
+        atmosphereColor: { value: new THREE.Color(0x94a3b8) },
         cloudTransition: { value: 0 },
-        cinematicTint: { value: new THREE.Color(0x64748b) } // Slate-500
+        cinematicTint: { value: new THREE.Color(0x64748b) }
       },
       vertexShader: `
         varying vec2 vUv;
@@ -87,29 +87,21 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
         varying vec3 vWorldPosition;
         
         void main() {
-          // Sample Earth texture
           vec3 earthColor = texture2D(earthTexture, vUv).rgb;
-          
-          // Apply cinematic blue/gray tinting
           earthColor = mix(earthColor, earthColor * cinematicTint, 0.3);
           
-          // Calculate lighting with enhanced contrast
           vec3 normal = normalize(vNormal);
           float sunDot = dot(normal, normalize(sunDirection));
           float lighting = max(0.4, sunDot * 1.2);
           
-          // Apply lighting to Earth color
           vec3 color = earthColor * lighting;
           
-          // Scroll-based enhancement with cinematic feel
           float enhancement = 1.0 + scrollProgress * 0.4;
           color *= enhancement;
           
-          // Atmospheric scattering with blue tint
           float atmosphere = pow(1.0 - abs(dot(normal, vec3(0.0, 0.0, 1.0))), 2.0);
           color = mix(color, atmosphereColor * 0.8, atmosphere * 0.15 * (1.0 + scrollProgress));
           
-          // Cloud transition effect with cinematic colors
           if (cloudTransition > 0.0) {
             float cloudEffect = sin(vUv.x * 15.0 + time * 1.5) * sin(vUv.y * 15.0 + time * 1.2);
             vec3 cloudColor = mix(vec3(0.9, 0.95, 1.0), atmosphereColor, 0.3);
@@ -122,14 +114,14 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
     });
   }, [earthTexture]);
 
-  // Cinematic atmosphere material with blue/gray theme
+  // Atmosphere material
   const atmosphereMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 0 },
         scrollProgress: { value: 0 },
         opacity: { value: 0.2 },
-        color: { value: new THREE.Color(0x94a3b8) } // Slate-400
+        color: { value: new THREE.Color(0x94a3b8) }
       },
       vertexShader: `
         varying vec3 vNormal;
@@ -140,8 +132,6 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
         void main() {
           vNormal = normalize(normalMatrix * normal);
           vPosition = position;
-          
-          // Scroll-based expansion
           vec3 pos = position * (1.0 + scrollProgress * 0.03);
           gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
         }
@@ -158,10 +148,7 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
           float intensity = pow(0.8 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
           vec3 atmosphere = color * intensity;
           
-          // Enhanced scroll-based intensity
           float scrollIntensity = 1.0 + scrollProgress * 1.5;
-          
-          // Cinematic pulsing
           float pulse = sin(time * 0.4 + scrollProgress * 2.0) * 0.15 + 0.85;
           
           gl_FragColor = vec4(atmosphere, opacity * intensity * pulse * scrollIntensity);
@@ -173,13 +160,13 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
     });
   }, []);
 
-  // Enhanced glow material with cinematic colors
+  // Glow material
   const glowMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 0 },
         scrollProgress: { value: 0 },
-        glowColor: { value: new THREE.Color(0x64748b) } // Slate-500
+        glowColor: { value: new THREE.Color(0x64748b) }
       },
       vertexShader: `
         varying vec3 vNormal;
@@ -188,8 +175,6 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
         
         void main() {
           vNormal = normalize(normalMatrix * normal);
-          
-          // Dynamic glow expansion
           vec3 pos = position * (1.0 + scrollProgress * 0.15 + sin(time * 0.3) * 0.01);
           gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
         }
@@ -214,15 +199,19 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
     });
   }, []);
 
-  // Optimized animation loop with proper bounds
+  // Optimized animation loop with better throttling
   useFrame((state) => {
     if (!meshRef.current || !groupRef.current) return;
     
     const time = state.clock.elapsedTime;
     const progress = scrollProgressRef.current;
     
-    // Early exit if no significant change
-    if (Math.abs(progress - (meshRef.current as any).lastProgress || 0) < 0.001) return;
+    // Throttle updates to 30fps for better performance
+    if (time - lastUpdateTime.current < 0.033) return;
+    lastUpdateTime.current = time;
+    
+    // Only update if progress changed significantly
+    if (Math.abs(progress - (meshRef.current as any).lastProgress || 0) < 0.005) return;
     (meshRef.current as any).lastProgress = progress;
     
     // Smooth Earth rotation with scroll influence
@@ -251,7 +240,7 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
     glowMaterial.uniforms.time.value = time;
     glowMaterial.uniforms.scrollProgress.value = progress; 
     
-    // Only apply subtle floating animation - let GSAP handle scroll-based transformations
+    // Subtle floating animation
     const floatY = Math.sin(time * 0.2) * 0.01;
     groupRef.current.position.y = floatY;
   });
@@ -265,36 +254,33 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
 
   return (
     <group ref={groupRef}>
-      {/* Enhanced Lighting Setup with cinematic colors */}
-      <ambientLight intensity={0.25} color="#f1f5f9" /> {/* Slate-100 */}
+      {/* Enhanced Lighting Setup */}
+      <ambientLight intensity={0.25} color="#f1f5f9" />
       
-      {/* Main sun light with blue tint */}
       <directionalLight 
         position={[10, 5, 5]} 
         intensity={1.8}
-        color="#e2e8f0" // Slate-200
+        color="#e2e8f0"
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
       />
       
-      {/* Fill light with cinematic blue */}
       <directionalLight 
         position={[-8, -3, -5]} 
         intensity={0.4}
-        color="#64748b" // Slate-500
+        color="#64748b"
       />
       
-      {/* Rim light for atmosphere */}
       <pointLight 
         position={[0, 0, 8]} 
         intensity={0.8}
-        color="#94a3b8" // Slate-400
+        color="#94a3b8"
         distance={25}
         decay={2}
       />
 
-      {/* Main Earth Sphere - SINGLE INSTANCE */}
+      {/* Main Earth Sphere */}
       <Sphere ref={meshRef} args={[1, 128, 64]} castShadow receiveShadow>
         <primitive object={earthMaterial} attach="material" />
       </Sphere>
@@ -309,10 +295,10 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
         <primitive object={glowMaterial} attach="material" />
       </Sphere>
 
-      {/* Additional cinematic glow layers */}
+      {/* Additional glow layers */}
       <Sphere args={[1.15, 16, 8]}>
         <meshBasicMaterial 
-          color="#64748b" // Slate-500
+          color="#64748b"
           transparent
           opacity={0.03}
           side={THREE.BackSide}
@@ -321,7 +307,7 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
       
       <Sphere args={[1.25, 12, 6]}>
         <meshBasicMaterial 
-          color="#94a3b8" // Slate-400
+          color="#94a3b8"
           transparent
           opacity={0.02}
           side={THREE.BackSide}
