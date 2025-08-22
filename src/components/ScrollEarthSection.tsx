@@ -15,6 +15,8 @@ const ScrollEarthSection: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const earthRef = useRef<any>(null);
+  const rafIdRef = useRef<number | null>(null);
+  const lastScrollTime = useRef<number>(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isInCloudTransition, setIsInCloudTransition] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -24,70 +26,193 @@ const ScrollEarthSection: React.FC = () => {
     offset: ["start start", "end end"]
   });
 
-  // Simplified scroll transforms
+  // Optimized scroll transforms with proper bounds
+  const earthScale = useTransform(scrollYProgress, [0, 0.2, 0.5, 0.8, 1], [1, 1.5, 2.5, 4, 5]);
+  const earthY = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, -50, -150, -250]);
   const earthOpacity = useTransform(scrollYProgress, [0, 0.1, 0.85, 1], [1, 1, 0.8, 0.3]);
   const cloudOpacity = useTransform(scrollYProgress, [0.3, 0.5, 0.7, 0.9], [0, 0.3, 0.8, 1]);
   const contentOpacity = useTransform(scrollYProgress, [0, 0.15, 0.85, 1], [0, 1, 1, 0]);
 
-  // Optimized scroll progress handler
+  // Throttled scroll progress handler with RAF
   const handleScrollProgress = useCallback((progress: number) => {
-    setScrollProgress(progress);
+    const now = performance.now();
+    if (now - lastScrollTime.current < 16) return; // Throttle to ~60fps
     
-    // Cloud transition logic
-    const shouldShowClouds = progress > 0.35 && progress < 0.75;
-    if (shouldShowClouds !== isInCloudTransition) {
-      setIsInCloudTransition(shouldShowClouds);
+    lastScrollTime.current = now;
+    
+    if (rafIdRef.current) {
+      cancelAnimationFrame(rafIdRef.current);
     }
+    
+    rafIdRef.current = requestAnimationFrame(() => {
+      setScrollProgress(progress);
+      
+      // Cloud transition logic with proper bounds
+      const shouldShowClouds = progress > 0.35 && progress < 0.75;
+      if (shouldShowClouds !== isInCloudTransition) {
+        setIsInCloudTransition(shouldShowClouds);
+      }
 
-    // Update Earth component
-    if (earthRef.current?.updateScroll) {
-      earthRef.current.updateScroll(progress);
-    }
+      // Update Earth component with throttled updates
+      if (earthRef.current?.updateScroll) {
+        earthRef.current.updateScroll(progress);
+      }
+    });
   }, [isInCloudTransition]);
 
-  // Lenis scroll handler with throttling
-  const lenis = useLenis(({ progress }) => {
+  // Lenis scroll handler
+  const lenis = useLenis(({ scroll, limit, velocity, direction, progress }) => {
     handleScrollProgress(progress);
   });
 
-  // Simplified GSAP scroll animations
+  // Cleanup RAF on unmount
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+    };
+  }, []);
+
+  // Advanced GSAP scroll animations with performance optimization
   useEffect(() => {
     if (!containerRef.current || !isLoaded) return;
 
+    // Disable ScrollTrigger refreshing during scroll for better performance
+    ScrollTrigger.config({
+      autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
+      ignoreMobileResize: true
+    });
+
     const ctx = gsap.context(() => {
-      // Simple canvas scale and position animation
+      // Use will-change CSS property for better performance
       if (canvasRef.current) {
-        gsap.to(canvasRef.current, {
-          scale: 3,
-          y: -200,
-          scrollTrigger: {
-            trigger: containerRef.current,
-            start: "top top",
-            end: "bottom bottom",
-            scrub: 1,
-            ease: "none"
-          }
+        gsap.set(canvasRef.current, {
+          willChange: "transform, opacity"
         });
       }
 
-      // History items animation
+      // Main Earth transformation timeline with optimized performance
+      const earthTimeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0.5, // Reduced for more responsive feel
+          invalidateOnRefresh: true,
+          fastScrollEnd: true, // Better performance on fast scrolling
+          preventOverlaps: true,
+          onUpdate: (self) => {
+            // Use direct progress updates instead of callbacks
+            const progress = self.progress;
+            handleScrollProgress(progress);
+          }
+        }
+      });
+
+      // Optimized canvas animations with GPU acceleration
+      if (canvasRef.current) {
+        earthTimeline
+          .to(canvasRef.current, {
+            scale: 2.5,
+            y: -100,
+            duration: 0.4,
+            ease: "none", // Linear easing for smoother scrub
+            force3D: true // Force GPU acceleration
+          })
+          .to(canvasRef.current, {
+            scale: 4.5,
+            y: -200,
+            duration: 0.4,
+            ease: "none",
+            force3D: true
+          }, 0.4)
+          .to(canvasRef.current, {
+            scale: 6,
+            y: -300,
+            opacity: 0.6,
+            duration: 0.2,
+            ease: "none",
+            force3D: true
+          }, 0.8);
+      }
+
+      // Batch DOM queries for better performance
       const historyElements = containerRef.current.querySelectorAll('.history-item');
+      const elementsArray = Array.from(historyElements);
       
-      ScrollTrigger.batch(historyElements, {
+      // Use single ScrollTrigger.batch for better performance
+      ScrollTrigger.batch(elementsArray, {
         onEnter: (elements) => {
           gsap.fromTo(elements, 
-            { opacity: 0, y: 100 },
-            { opacity: 1, y: 0, duration: 1, stagger: 0.1 }
+            { 
+              opacity: 0, 
+              y: 120,
+              scale: 0.95,
+              rotateX: -10
+            },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              rotateX: 0,
+              duration: 1.2,
+              ease: "power3.out",
+              stagger: 0.1,
+              force3D: true
+            }
           );
         },
-        start: "top 80%",
-        end: "top 20%"
+        onLeave: (elements) => {
+          gsap.to(elements, {
+            opacity: 0,
+            y: -50,
+            duration: 0.5,
+            force3D: true
+          });
+        },
+        onEnterBack: (elements) => {
+          gsap.to(elements, {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            force3D: true
+          });
+        },
+        start: "top 85%",
+        end: "top 25%"
       });
 
     }, containerRef);
 
-    return () => ctx.revert();
-  }, [isLoaded]);
+    return () => {
+      ctx.revert();
+      // Clean up will-change
+      if (canvasRef.current) {
+        gsap.set(canvasRef.current, {
+          willChange: "auto"
+        });
+      }
+    };
+  }, [isLoaded, handleScrollProgress]);
+
+  // Optimized scroll progress updates with debouncing
+  useEffect(() => {
+    let ticking = false;
+    
+    const updateProgress = (latest: number) => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setScrollProgress(latest);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    const unsubscribe = scrollYProgress.on('change', updateProgress);
+    return () => unsubscribe();
+  }, [scrollYProgress]);
 
   // Loading handler
   useEffect(() => {
@@ -98,24 +223,32 @@ const ScrollEarthSection: React.FC = () => {
   return (
     <div 
       ref={containerRef}
-      className="relative min-h-[600vh] bg-gradient-to-b from-slate-900 via-blue-950 to-black overflow-hidden"
+      className="relative min-h-[600vh] bg-gradient-to-b from-slate-900 via-blue-950 to-black overflow-hidden transform-gpu"
     >
-      {/* Hero Section with Earth */}
+      {/* Hero Section */}
       <div className="relative h-screen flex items-center justify-center">
-        {/* Fixed 3D Earth Canvas - Always visible */}
+        {/* Fixed 3D Earth Canvas - SINGLE INSTANCE */}
         <div 
           ref={canvasRef}
           className="fixed inset-0 z-10 pointer-events-none"
+          style={{
+            transform: 'translateZ(0)', // Force GPU acceleration
+            willChange: 'transform, opacity'
+          }}
         >
           <Canvas
             camera={{ position: [0, 0, 5], fov: 50 }}
             gl={{ 
               antialias: true, 
               alpha: true,
-              powerPreference: "high-performance"
+              powerPreference: "high-performance", 
+              stencil: false,
+              depth: true,
             }}
-            dpr={Math.min(window.devicePixelRatio, 2)}
+            dpr={Math.min(window.devicePixelRatio, 2)} // Optimize pixel ratio
+            performance={{ min: 0.8 }} // Performance threshold
           >
+            {/* SINGLE Earth instance with proper ref */}
             <ScrollEarth 
               ref={earthRef}
               scrollProgress={scrollProgress}
@@ -204,6 +337,7 @@ const ScrollEarthSection: React.FC = () => {
 
       {/* Scrollable Content */}
       <div className="relative z-20">
+        {/* History Content Sections */}
         <motion.div 
           className="relative"
           style={{ opacity: contentOpacity }}
@@ -215,7 +349,7 @@ const ScrollEarthSection: React.FC = () => {
         <div className="h-screen" />
       </div>
 
-      {/* Scroll Progress Indicator */}
+      {/* Optimized Scroll Progress Indicator */}
       <div className="fixed top-1/2 right-8 transform -translate-y-1/2 z-30">
         <div className="w-1 h-32 bg-slate-700 rounded-full overflow-hidden">
           <motion.div
@@ -231,7 +365,7 @@ const ScrollEarthSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Background Effects */}
+      {/* Cinematic Background Effects */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-950/20 to-transparent" />
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
@@ -262,20 +396,20 @@ const ScrollEarthSection: React.FC = () => {
   );
 };
 
-// Wrap with ReactLenis for smooth scrolling
+// Wrap with ReactLenis for optimized smooth scrolling
 const ScrollEarthSectionWithLenis: React.FC = () => {
   return (
     <ReactLenis 
       root 
       options={{
-        duration: 1.0,
+        duration: 1.2,
         easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
         direction: 'vertical',
         gestureDirection: 'vertical',
         smooth: true,
-        mouseMultiplier: 0.8,
+        mouseMultiplier: 1,
         smoothTouch: false,
-        touchMultiplier: 1.5,
+        touchMultiplier: 2,
         infinite: false,
         autoResize: true,
       }}

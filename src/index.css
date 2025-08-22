@@ -22,7 +22,6 @@
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
-  height: 100%;
 }
 
 body {
@@ -30,15 +29,9 @@ body {
   background-color: var(--space-black);
   color: var(--primary-white);
   overflow-x: hidden;
-  height: 100%;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-#root {
-  height: 100%;
-  min-height: 100vh;
 }
 
 /* Custom scrollbar */
@@ -270,16 +263,18 @@ canvas {
 
 /* Scroll performance optimizations */
 * {
-  scroll-behavior: smooth;
+  scroll-behavior: auto; /* Let Lenis handle smooth scrolling */
 }
 
 /* Reduce paint complexity during scroll */
 .history-item,
 .timeline-event {
   contain: layout style;
+  will-change: transform, opacity;
 }
 
 /* Optimize transforms for better performance */
 .period-image {
+  will-change: transform;
   backface-visibility: hidden;
 }
