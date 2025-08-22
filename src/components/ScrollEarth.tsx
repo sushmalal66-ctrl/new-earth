@@ -253,14 +253,9 @@ const ScrollEarth = forwardRef<ScrollEarthRef, ScrollEarthProps>(({
     glowMaterial.uniforms.time.value = time;
     glowMaterial.uniforms.scrollProgress.value = progress; 
     
-    // Controlled positioning with proper bounds
+    // Only apply subtle floating animation - let GSAP handle scroll-based transformations
     const floatY = Math.sin(time * 0.2) * 0.01;
-    const scrollY = -progress * 1.5; // Reduced for better visibility
-    groupRef.current.position.y = floatY + scrollY;
-    
-    // Controlled scale changes with bounds
-    const scrollScale = Math.max(0.8, Math.min(3.5, 1 + progress * 1.8));
-    groupRef.current.scale.setScalar(scrollScale);
+    groupRef.current.position.y = floatY;
   });
 
   // Expose methods to parent component
