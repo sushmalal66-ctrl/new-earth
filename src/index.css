@@ -7,6 +7,7 @@
 /* CSS Variables for dynamic theming */
 :root {
   --scroll-progress: 0;
+  --timeline-progress: 0;
   --earth-rotation: 0deg;
   --particle-density: 1;
 }
@@ -44,6 +45,18 @@ body {
   transform: translateZ(0);
   will-change: transform;
   backface-visibility: hidden;
+}
+
+/* Horizontal scroll optimizations */
+.horizontal-scroll-container {
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+.timeline-card {
+  contain: layout style paint;
+  will-change: transform, opacity;
 }
 
 /* Custom scrollbar */
@@ -110,6 +123,15 @@ body {
   .scroll-smooth {
     scroll-behavior: smooth;
   }
+  
+  /* Timeline-specific utilities */
+  .timeline-progress {
+    transform: scaleX(var(--timeline-progress));
+  }
+  
+  .earth-rotation {
+    transform: rotateY(calc(var(--timeline-progress) * 360deg));
+  }
 }
 
 /* Animation classes */
@@ -123,6 +145,23 @@ body {
   }
   50% {
     transform: translateY(-15px);
+  }
+}
+
+/* Enhanced float animation for timeline elements */
+.animate-float {
+  animation: enhancedFloat 6s ease-in-out infinite;
+}
+
+@keyframes enhancedFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+  66% {
+    transform: translateY(-5px) rotate(-1deg);
   }
 }
 
@@ -151,6 +190,18 @@ body {
 @keyframes twinkle {
   0%, 100% { opacity: 0.3; transform: scale(0.8); }
   50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Typing animation cursor effect */
+.typing-cursor::after {
+  content: '|';
+  animation: blink 1s infinite;
+  color: currentColor;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
 }
 
 /* Enhanced button styles */
@@ -188,6 +239,17 @@ section {
   will-change: transform, opacity;
 }
 
+/* Horizontal timeline specific optimizations */
+.horizontal-timeline {
+  contain: strict;
+  will-change: transform;
+}
+
+.timeline-era {
+  contain: layout style paint;
+  transform: translateZ(0);
+}
+
 /* Performance optimizations for mobile */
 @media (max-width: 768px) {
   .particle-field {
@@ -200,6 +262,15 @@ section {
   
   .backdrop-blur-strong {
     backdrop-filter: blur(8px); /* Reduce blur complexity */
+  }
+  
+  /* Reduce timeline complexity on mobile */
+  .timeline-era {
+    will-change: transform;
+  }
+  
+  .animate-float {
+    animation: none; /* Disable complex animations on mobile */
   }
 }
 
@@ -220,9 +291,17 @@ section {
   }
   
   .float-animation,
+  .animate-float,
   .glow-pulse,
-  .particle-twinkle {
+  .particle-twinkle,
+  .typing-cursor::after {
     animation: none;
+  }
+  
+  /* Disable horizontal scroll animations for reduced motion */
+  .horizontal-timeline * {
+    transition: none !important;
+    animation: none !important;
   }
 }
 

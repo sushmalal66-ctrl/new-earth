@@ -6,24 +6,31 @@ import ParticleField from './ParticleField';
 
 interface SceneProps {
   earthProgress: MotionValue<number>;
+  timelineProgress?: MotionValue<number>;
 }
 
-const Scene: React.FC<SceneProps> = ({ earthProgress }) => {
+const Scene: React.FC<SceneProps> = ({ earthProgress, timelineProgress }) => {
   return (
     <Suspense fallback={null}>
-      {/* Sparse Star Field */}
+      {/* Enhanced Star Field with timeline synchronization */}
       <Stars 
         radius={100} 
         depth={50} 
-        count={2000} 
+        count={3000} 
         factor={4} 
         saturation={0} 
         fade={true}
-        speed={0.5}
+        speed={1}
       />
       
+      {/* Particle Field for additional atmosphere */}
+      <ParticleField earthProgress={earthProgress} />
+      
       {/* Main Earth */}
-      <Earth earthProgress={earthProgress} />
+      <Earth 
+        earthProgress={earthProgress} 
+        timelineProgress={timelineProgress}
+      />
     </Suspense>
   );
 };

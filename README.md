@@ -1,12 +1,15 @@
 # The History of Earth - Interactive Journey
 
-A cinematic, scroll-driven experience through Earth's 4.6 billion year history, built with React, Three.js, and smooth scrolling technologies.
+A cinematic, **horizontal timeline** experience through Earth's 4.6 billion year history, built with React, Three.js, and advanced scroll-based animations.
 
 ## 🌍 Features
 
 - **Immersive 3D Earth**: Real-time rotating planet with dynamic textures and atmospheric effects
-- **Smooth Scrolling**: Buttery-smooth scroll experience powered by Lenis and GSAP
+- **Horizontal Timeline**: Revolutionary horizontal scrolling timeline with vertical scroll input
+- **Typing Animations**: Futuristic typing effects for section titles using react-type-animation
+- **Smooth Scrolling**: Buttery-smooth scroll experience powered by Lenis and GSAP ScrollTrigger
 - **Cinematic Animations**: Framer Motion and GSAP-powered transitions and parallax effects
+- **Synchronized Earth Rotation**: Planet rotation synchronized with timeline progress
 - **Responsive Design**: Optimized for all devices with performance-aware rendering
 - **Accessibility**: Full keyboard navigation and reduced-motion support
 - **Performance Optimized**: 60fps target with intelligent LOD and mobile optimizations
@@ -18,6 +21,7 @@ A cinematic, scroll-driven experience through Earth's 4.6 billion year history, 
 - **Framer Motion** - UI animations and gestures
 - **GSAP** + **ScrollTrigger** - Advanced scroll-based animations
 - **@studio-freight/lenis** - Smooth scrolling engine
+- **react-type-animation** - Typing animation effects
 - **Tailwind CSS** - Utility-first styling
 
 ## 📦 Installation
@@ -49,6 +53,7 @@ src/
 │   │   ├── Earth.tsx          # Main 3D Earth component
 │   │   ├── Scene.tsx          # 3D scene setup and lighting
 │   │   └── ParticleField.tsx  # Space particles and effects
+│   ├── HorizontalTimeline.tsx # Horizontal scrolling timeline
 │   └── ui/
 │       └── Section.tsx        # Reusable section component
 ├── hooks/
@@ -63,7 +68,71 @@ src/
     └── index.css             # Global styles and utilities
 ```
 
+## 🎬 New Features
+
+### Horizontal Timeline Scrolling
+
+The application now features a revolutionary horizontal timeline that responds to vertical scroll input:
+
+- **Natural Scroll Behavior**: Vertical mouse/trackpad scrolling moves content horizontally
+- **GSAP ScrollTrigger Integration**: Seamless integration with Lenis for smooth, bug-free scrolling
+- **Timeline Cards**: Each era is presented as a full-screen horizontal card
+- **Earth Synchronization**: Planet rotation speed and scale change based on timeline progress
+- **Parallax Effects**: Background elements move at different speeds for depth
+
+### Typing Animations
+
+Section titles now feature futuristic typing effects:
+
+- **react-type-animation**: Professional typing animation library
+- **Trigger on View**: Animations start when sections come into viewport
+- **Customizable Speed**: Different typing speeds for titles and subtitles
+- **Gradient Text**: Animated text with beautiful gradient effects
+
 ## ⚙️ Configuration
+
+### Horizontal Scroll Setup
+
+The horizontal timeline is configured in `src/components/HorizontalTimeline.tsx`:
+
+```typescript
+// Create horizontal scroll animation
+const horizontalScroll = gsap.to(timeline, {
+  x: -totalWidth,
+  ease: "none",
+  scrollTrigger: {
+    trigger: container,
+    start: "top top",
+    end: () => `+=${totalWidth}`,
+    scrub: 1,
+    pin: true,
+    anticipatePin: 1,
+    invalidateOnRefresh: true,
+    onUpdate: (self) => {
+      const progress = self.progress;
+      earthProgress.set(progress);
+      // Synchronize Earth rotation with timeline
+    }
+  }
+});
+```
+
+### Typing Animation Configuration
+
+Typing effects are configured per section:
+
+```typescript
+<TypeAnimation
+  sequence={[
+    '', // Start with empty string
+    500, // Wait 500ms
+    era.title, // Type the title
+  ]}
+  wrapper="span"
+  speed={50}
+  repeat={0}
+/>
+```
 
 ### Performance Settings
 
@@ -75,7 +144,7 @@ The app automatically adjusts quality based on device capabilities:
 
 ### Scroll Configuration
 
-Lenis is configured for optimal smoothness:
+Lenis is configured for optimal smoothness with horizontal scroll support:
 
 ```typescript
 const lenis = new Lenis({
@@ -83,13 +152,16 @@ const lenis = new Lenis({
   easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
   smooth: true,
   normalizeWheel: true,
-  syncTouch: true
+  syncTouch: true,
+  lerp: 0.1,
+  wheelMultiplier: 1,
+  touchInertiaMultiplier: 35
 });
 ```
 
 ### GSAP Integration
 
-ScrollTrigger is properly synced with Lenis:
+ScrollTrigger is properly synced with Lenis for horizontal scrolling:
 
 ```typescript
 ScrollTrigger.scrollerProxy(document.body, {
@@ -99,27 +171,39 @@ ScrollTrigger.scrollerProxy(document.body, {
       : window.scrollY;
   }
 });
+
+// Enhanced settings for horizontal scroll
+ScrollTrigger.defaults({ 
+  scroller: document.body,
+  refreshPriority: 0,
+  anticipatePin: 1
+});
 ```
 
 ## 🎨 Customization
 
-### Adding New Sections
+### Adding New Timeline Eras
 
-1. Add section data to `src/data/sections.ts`:
+1. Add era data to `src/components/HorizontalTimeline.tsx`:
 
 ```typescript
 {
   id: 'new-era',
-  title: 'New Era',
-  subtitle: 'Subtitle here',
-  description: 'Description...',
-  era: 'Era Name',
-  timeAgo: 'Time period',
-  keyPoints: ['Point 1', 'Point 2']
+  era: 'New Era',
+  timeAgo: 'X Million Years Ago',
+  title: 'Era Title',
+  subtitle: 'Era Subtitle',
+  description: 'Era description...',
+  keyEvents: ['Event 1', 'Event 2'],
+  icon: IconComponent,
+  color: '#color',
+  gradient: 'from-color-to-color',
+  image: 'image-url',
+  position: 0.5 // Position along timeline (0-1)
 }
 ```
 
-2. The section will automatically render with animations
+2. The era will automatically render with typing animations
 
 ### Modifying Earth Appearance
 
@@ -127,15 +211,32 @@ Edit `src/components/3d/Earth.tsx`:
 
 - Change textures by updating the texture URLs
 - Modify shaders for different visual effects
-- Adjust rotation speed and scale animations
+- Adjust rotation speed and scale animations based on timeline progress
+
+### Customizing Typing Animations
+
+Edit typing sequences in `HorizontalTimeline.tsx`:
+
+```typescript
+// Customize typing speed and delays
+<TypeAnimation
+  sequence={[
+    '', 
+    customDelay,
+    text,
+  ]}
+  speed={customSpeed}
+  style={customStyles}
+/>
+```
 
 ### Customizing Animations
 
-Edit `src/animations/timelines.ts`:
+Edit horizontal scroll animations:
 
-- Add new ScrollTrigger animations
-- Modify parallax effects
-- Create custom timeline sequences
+- Modify scroll trigger points
+- Adjust parallax speeds
+- Create custom card entrance animations
 
 ## 🔧 Performance Optimization
 
@@ -145,6 +246,8 @@ Edit `src/animations/timelines.ts`:
 - **Texture Compression**: Optimized texture loading and caching
 - **Render Culling**: Off-screen elements are not rendered
 - **Mobile Detection**: Reduced effects on mobile devices
+- **Horizontal Scroll Optimization**: GPU-accelerated transforms
+- **Animation Batching**: Grouped animations for better performance
 
 ### Manual Optimizations
 
@@ -154,6 +257,9 @@ const particleCount = window.innerWidth < 768 ? 500 : 2000;
 
 // Disable expensive effects on low-end devices
 const enableComplexShaders = navigator.hardwareConcurrency > 4;
+
+// Optimize horizontal scroll for mobile
+const enableHorizontalScroll = window.innerWidth > 768;
 ```
 
 ## 🎯 Browser Support
@@ -171,16 +277,28 @@ const enableComplexShaders = navigator.hardwareConcurrency > 4;
    - Check if other smooth scroll libraries are conflicting
    - Ensure `scroll-behavior: auto` is set in CSS
    - Verify Lenis is properly initialized
+   - Check horizontal scroll performance settings
 
 2. **3D Earth not rendering**:
    - Check WebGL support in browser
    - Verify texture URLs are accessible
    - Check browser console for Three.js errors
 
-3. **Animations not smooth**:
+3. **Horizontal scroll not working**:
+   - Verify GSAP ScrollTrigger is properly registered
+   - Check container dimensions and scroll distances
+   - Ensure Lenis and ScrollTrigger are synchronized
+
+4. **Typing animations not triggering**:
+   - Check viewport intersection logic
+   - Verify react-type-animation is properly installed
+   - Check animation trigger conditions
+
+5. **Animations not smooth**:
    - Reduce particle count in `ParticleField.tsx`
    - Lower geometry complexity in `Earth.tsx`
    - Check if `will-change` properties are properly set
+   - Disable complex animations on low-end devices
 
 ### Performance Debugging
 
@@ -193,6 +311,11 @@ document.body.appendChild(stats.dom);
 useFrame(() => {
   stats.update();
 });
+
+// Debug horizontal scroll performance
+ScrollTrigger.addEventListener("refresh", () => {
+  console.log("ScrollTrigger refreshed");
+});
 ```
 
 ## 📱 Mobile Considerations
@@ -201,6 +324,8 @@ useFrame(() => {
 - Touch scrolling is optimized with `syncTouch: true`
 - Texture resolution is lowered for better performance
 - Complex shaders are simplified on low-end devices
+- Horizontal scroll is optimized for touch devices
+- Typing animations are simplified on mobile
 
 ## 🌟 Contributing
 
@@ -220,7 +345,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Three.js community for excellent documentation
 - GSAP team for powerful animation tools
 - Lenis team for smooth scrolling innovation
+- react-type-animation for typing effects
 
 ---
 
-Built with ❤️ for exploring our planet's incredible history.
+Built with ❤️ for exploring our planet's incredible history through innovative web technologies.

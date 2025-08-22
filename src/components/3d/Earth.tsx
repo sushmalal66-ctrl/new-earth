@@ -6,14 +6,16 @@ import * as THREE from 'three';
 
 interface EarthProps {
   earthProgress: MotionValue<number>;
+  timelineProgress?: MotionValue<number>;
 }
 
-const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
+const Earth: React.FC<EarthProps> = ({ earthProgress, timelineProgress }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   const [hasMovedForward, setHasMovedForward] = useState(false);
   const [targetZ, setTargetZ] = useState(0);
   const [currentZ, setCurrentZ] = useState(0);
+  const [rotationSpeed, setRotationSpeed] = useState(0.5);
   
   // Load Earth texture with fallback
   let earthTexture;
@@ -64,14 +66,41 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [hasMovedForward]);
 
+  // Listen for timeline progress changes to adjust rotation speed
+  useEffect(() => {
+    const handleTimelineProgress = () => {
+      if (timelineProgress) {
+        const progress = timelineProgress.get();
+        // Vary rotation speed based on timeline progress (0.3 to 1.2)
+        const newSpeed = 0.3 + (progress * 0.9);
+        setRotationSpeed(newSpeed);
+      }
+    };
+
+    // Listen for custom scroll events
+    window.addEventListener('scroll-progress', handleTimelineProgress);
+    
+    return () => {
+      window.removeEventListener('scroll-progress', handleTimelineProgress);
+    };
+  }, [timelineProgress]);
+
   // Animation loop
   useFrame((state) => {
     if (!meshRef.current || !groupRef.current) return;
     
     const time = state.clock.elapsedTime;
+    const progress = earthProgress.get();
     
-    // Continuous rotation on Y-axis (vertical axis)
-    meshRef.current.rotation.y = time * 0.5; // Smooth, consistent rotation
+    // Enhanced rotation synchronized with timeline progress
+    // Base rotation + timeline-influenced rotation
+    const baseRotation = time * rotationSpeed;
+    const timelineRotation = progress * Math.PI * 4; // 4 full rotations across timeline
+    meshRef.current.rotation.y = baseRotation + timelineRotation;
+    
+    // Subtle wobble effect based on timeline progress
+    meshRef.current.rotation.x = Math.sin(time * 0.3) * 0.05 + (progress * 0.1);
+    meshRef.current.rotation.z = Math.cos(time * 0.2) * 0.03;
     
     // Smooth forward movement when triggered
     if (currentZ < targetZ) {
@@ -79,6 +108,10 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
       setCurrentZ(newZ);
       groupRef.current.position.z = newZ;
     }
+    
+    // Scale effect based on timeline progress
+    const scaleMultiplier = 1 + (progress * 0.2); // Grow up to 20% larger
+    groupRef.current.scale.setScalar(scaleMultiplier);
   });
 
   return (
@@ -90,11 +123,28 @@ const Earth: React.FC<EarthProps> = ({ earthProgress }) => {
         intensity={1.0}
         castShadow={false}
       />
+      {/* Additional rim lighting for dramatic effect */}
+      <directionalLight 
+        position={[-5, -3, -5]} 
+        intensity={0.4}
+        color="#4a90e2"
+      />
       
       {/* Earth Sphere */}
       <mesh ref={meshRef}>
-        <sphereGeometry args={[1, 64, 32]} />
+        <sphereGeometry args={[1, 128, 64]} />
         <primitive object={earthMaterial} attach="material" />
+      </mesh>
+      
+      {/* Atmospheric glow effect */}
+      <mesh scale={1.05}>
+        <sphereGeometry args={[1, 32, 16]} />
+        <meshBasicMaterial 
+          color="#4a90e2" 
+          transparent 
+          opacity={0.1} 
+          side={THREE.BackSide}
+        />
       </mesh>
     </group>
   );

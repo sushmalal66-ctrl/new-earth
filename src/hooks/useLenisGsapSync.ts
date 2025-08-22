@@ -11,6 +11,7 @@ export const useLenisGsapSync = () => {
   const lenisRef = useRef<Lenis | null>(null);
   const scrollProgress = useMotionValue(0);
   const earthProgress = useMotionValue(0);
+  const timelineProgress = useMotionValue(0);
   const rafId = useRef<number>();
 
   useEffect(() => {
@@ -27,7 +28,11 @@ export const useLenisGsapSync = () => {
       infinite: false,
       autoResize: true,
       normalizeWheel: true,
-      syncTouch: true
+      syncTouch: true,
+      // Enhanced settings for horizontal scroll compatibility
+      lerp: 0.1,
+      wheelMultiplier: 1,
+      touchInertiaMultiplier: 35
     });
 
     lenisRef.current = lenis;
@@ -50,8 +55,19 @@ export const useLenisGsapSync = () => {
       pinType: document.body.style.transform ? 'transform' : 'fixed'
     });
 
-    // Set ScrollTrigger defaults
-    ScrollTrigger.defaults({ scroller: document.body });
+    // Set ScrollTrigger defaults with enhanced settings for horizontal scroll
+    ScrollTrigger.defaults({ 
+      scroller: document.body,
+      refreshPriority: 0,
+      anticipatePin: 1
+    });
+
+    // Configure ScrollTrigger for better performance with horizontal scrolling
+    ScrollTrigger.config({
+      autoRefreshEvents: "visibilitychange,DOMContentLoaded,load,resize",
+      limitCallbacks: true,
+      ignoreMobileResize: true
+    });
 
     // Sync Lenis with GSAP ticker for perfect synchronization
     const raf = (time: number) => {
@@ -70,21 +86,42 @@ export const useLenisGsapSync = () => {
       // Calculate earth-specific progress (0-1 across all sections)
       const earthProgressValue = Math.min(1, Math.max(0, progress));
       earthProgress.set(earthProgressValue);
+      
+      // Update timeline progress for horizontal scroll synchronization
+      timelineProgress.set(progress);
+      
+      // Dispatch custom events for component communication
+      window.dispatchEvent(new CustomEvent('scroll-progress', { 
+        detail: { 
+          progress, 
+          scroll, 
+          velocity, 
+          direction 
+        } 
+      }));
     });
 
     // Refresh ScrollTrigger after Lenis is ready
-    ScrollTrigger.addEventListener('refresh', () => lenis.resize());
-    ScrollTrigger.refresh();
+    ScrollTrigger.addEventListener('refresh', () => {
+      lenis.resize();
+    });
+    
+    // Delayed refresh to ensure proper initialization
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
 
     // Cleanup function
     return () => {
       if (rafId.current) {
         cancelAnimationFrame(rafId.current);
       }
+      lenis.off('scroll');
       lenis.destroy();
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      ScrollTrigger.clearScrollMemory();
     };
-  }, [scrollProgress, earthProgress]);
+  }, [scrollProgress, earthProgress, timelineProgress]);
 
   // Expose scroll methods
   const scrollTo = (target: string | number, options?: any) => {
@@ -95,11 +132,22 @@ export const useLenisGsapSync = () => {
     lenisRef.current?.scrollTo(0, { duration: 2 });
   };
 
+  // Method to scroll to specific timeline position
+  const scrollToTimelinePosition = (progress: number) => {
+    if (lenisRef.current) {
+      const maxScroll = document.body.scrollHeight - window.innerHeight;
+      const targetScroll = maxScroll * progress;
+      lenisRef.current.scrollTo(targetScroll, { duration: 1.5 });
+    }
+  };
+
   return {
     scrollProgress,
     earthProgress,
+    timelineProgress,
     scrollTo,
     scrollToTop,
+    scrollToTimelinePosition,
     lenis: lenisRef.current
   };
 };
